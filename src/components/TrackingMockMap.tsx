@@ -206,13 +206,10 @@ interface TrackingMockMapProps {
 }
 
 const API_KEY =
-  process.env.GOOGLE_MAPS_PLATFORM_KEY ||
-  (import.meta as any).env?.VITE_GOOGLE_MAPS_PLATFORM_KEY ||
-  (globalThis as any).GOOGLE_MAPS_PLATFORM_KEY ||
-  '';
+  process.env.NEXT_PUBLIC_GOOGLE_MAPS_PLATFORM_KEY || '';
 const hasValidKey = Boolean(API_KEY) && API_KEY !== 'YOUR_API_KEY' && API_KEY.trim() !== '';
 
-// Google Maps custom dashed/solid Polyline Drawer Component
+
 function MapPolyline({ path, color, isDashed = false }: { path: google.maps.LatLngLiteral[]; color: string; isDashed?: boolean }) {
   const map = useMap();
 
@@ -249,7 +246,6 @@ function MapPolyline({ path, color, isDashed = false }: { path: google.maps.LatL
   return null;
 }
 
-// Automatically bounding map view fitting all points beautifully has-valid-key
 function FitBounds({ path }: { path: google.maps.LatLngLiteral[] }) {
   const map = useMap();
 
@@ -280,7 +276,7 @@ export default function TrackingMockMap({
 }: TrackingMockMapProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
-  // Find current active index based on shipment status match
+
   const currentStatusIndex = useMemo(() => {
     const idx = MILESTONES.findIndex(m => m.id === status);
     return idx !== -1 ? idx : 0;
@@ -299,7 +295,7 @@ export default function TrackingMockMap({
   const progressPercent = useMemo(() => {
     if (status === "DELIVERED") return 100;
 
-    // Explicit numeric tracking fields have precedence!
+
     if (distanceCovered !== undefined && distanceCovered >= 0) {
       if (totalDistance <= 0) return 0;
       const calculatedPercent = (distanceCovered / totalDistance) * 100;
@@ -317,7 +313,7 @@ export default function TrackingMockMap({
 
     if (status === "MANIFEST_CREATED") return 0;
 
-    // Default status fallback
+
     switch (status) {
       case "MANIFEST_CREATED": return 0;
       case "DRY_BULK_SORTED": return 25;
@@ -332,7 +328,7 @@ export default function TrackingMockMap({
     return interpolate(start, end, progressPercent / 100);
   }, [start, end, progressPercent]);
 
-  // Dynamic coordinates calculated based on origin and destination
+
   const dynamicCoords = useMemo(() => {
     return {
       MANIFEST_CREATED: start,
@@ -343,7 +339,7 @@ export default function TrackingMockMap({
     };
   }, [start, end]);
 
-  // Dynamic status-specific color and theme parameters
+
   const themeAccent = useMemo(() => {
     switch (status) {
       case "DELIVERED":
@@ -377,7 +373,6 @@ export default function TrackingMockMap({
     }
   }, [status]);
 
-  // Dynamically select the vehicle/carrier icon
   const CarrierVehicleIcon = useMemo(() => {
     const nameLower = carrierName.toLowerCase();
     if (nameLower.includes("marine") || nameLower.includes("ocean") || nameLower.includes("sea") || nameLower.includes("port")) {
@@ -395,7 +390,7 @@ export default function TrackingMockMap({
     return WEATHER_DATA[activeNode.id] || WEATHER_DATA.MANIFEST_CREATED;
   }, [activeNode.id]);
 
-  // Coordinate arrays for polyline drawings
+
   const coveredPath = useMemo(() => {
     return [start, currentVehicleCoords];
   }, [start, currentVehicleCoords]);
@@ -408,7 +403,7 @@ export default function TrackingMockMap({
     return [start, end];
   }, [start, end]);
 
-  // Relative XY coordinates mapping for vector dashboard fallback
+
   const getRelativeXY = React.useCallback((coord: { lat: number; lng: number }) => {
     const coordsArray = [start, end];
     const latVals = coordsArray.map(c => c.lat);
@@ -421,7 +416,6 @@ export default function TrackingMockMap({
     const latDelta = maxLat - minLat || 1;
     const lngDelta = maxLng - minLng || 1;
 
-    // Scale coordinate positions mapping strictly within 15% and 85% area of the SVG plane
     const x = 15 + 70 * ((coord.lng - minLng) / lngDelta);
     const y = 85 - 70 * ((coord.lat - minLat) / latDelta);
 
@@ -431,7 +425,7 @@ export default function TrackingMockMap({
   return (
     <div id="crest_transit_map_widget" className="bg-white dark:bg-[#0c1411] border border-stone-200/60 dark:border-stone-800 shadow-3xs rounded-3xl p-5 flex flex-col gap-4 select-none overflow-hidden transition-colors">
       
-      {/* Visual Map Widget Title Header */}
+
       <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2 pb-2 border-b border-stone-100 dark:border-stone-800">
         <div className="flex items-center gap-2">
           <div className="bg-[#111E19] text-[#F7E4A1] p-1.5 rounded-lg">
@@ -464,17 +458,17 @@ export default function TrackingMockMap({
         </div>
       </div>
 
-      {/* Styled Google Map Canvas Area */}
+
       <div className="relative h-64 bg-[#FAF7EE] dark:bg-[#060a08] border border-stone-200/50 dark:border-stone-900 rounded-2xl overflow-hidden shadow-inner flex flex-col justify-center transition-colors">
         
         {!hasValidKey ? (
-          /* Render interactive Vector Simulation Map fallback if Google Maps Key is absent */
+
           <div className="relative w-full h-full bg-[#FAF7EE] dark:bg-[#080d0b] overflow-hidden flex flex-col justify-between p-3 select-none">
             
-            {/* Ambient cybernetic background grids */}
+
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#e5e2d5_1px,transparent_1px),linear-gradient(to_bottom,#e5e2d5_1px,transparent_1px)] dark:bg-[linear-gradient(to_right,#101714_1px,transparent_1px),linear-gradient(to_bottom,#101714_1px,transparent_1px)] bg-[size:16px_16px] opacity-30 pointer-events-none" />
             
-            {/* Top Info Bar */}
+
             <div className="flex justify-between items-center z-10 p-2 bg-white/70 dark:bg-stone-900/80 backdrop-blur-xs rounded-xl border border-stone-200/50 dark:border-stone-800 shadow-3xs">
               <div className="flex items-center gap-1.5 font-mono text-[9px]">
                 <span className="w-1.5 h-1.5 rounded-full bg-[#A35638] animate-pulse" />
@@ -485,12 +479,12 @@ export default function TrackingMockMap({
               </div>
             </div>
 
-            {/* Core Plotting Canvas: Animated SVG and Node Overlay */}
+
             <div className="flex-grow w-full relative h-[140px] flex items-center justify-center">
               
-              {/* Dynamic Connecting Route Line segments */}
+
               <svg className="absolute inset-0 w-full h-full pointer-events-none z-0" style={{ minHeight: '130px' }}>
-                {/* Background Full Route Line */}
+
                 <line
                   x1={`${getRelativeXY(start).x}%`}
                   y1={`${getRelativeXY(start).y}%`}
@@ -511,7 +505,7 @@ export default function TrackingMockMap({
                   className="opacity-40 transition-all duration-300"
                 />
 
-                {/* Covered Solid Route Line */}
+
                 <line
                   x1={`${getRelativeXY(start).x}%`}
                   y1={`${getRelativeXY(start).y}%`}
@@ -523,7 +517,7 @@ export default function TrackingMockMap({
                 />
               </svg>
 
-              {/* Render Milestone Nodes */}
+
               {MILESTONES.map((node, idx) => {
                 const milestonePercent = idx * 25;
                 const isPassed = progressPercent >= milestonePercent || status === "DELIVERED";
@@ -537,12 +531,11 @@ export default function TrackingMockMap({
                     style={{ left: `${x}%`, top: `${y}%` }}
                   >
                     <div className="relative flex flex-col items-center">
-                      {/* Outer pulsing ring for active nodes */}
+
                       {isCurrentActive && (
                         <div className="absolute -inset-1.5 rounded-full ring-2 ring-[#A35638] animate-ping duration-1000 scale-100" />
                       )}
 
-                      {/* Small node bullet */}
                       <div className={`w-5.5 h-5.5 rounded-full flex items-center justify-center border-1.5 shadow-2xs transition-all cursor-pointer ${
                         isCurrentActive 
                           ? "bg-[#111E19] border-[#A35638] text-[#F7E4A1]"
@@ -553,7 +546,7 @@ export default function TrackingMockMap({
                         <node.icon className="w-3 h-3" />
                       </div>
 
-                      {/* Floating text labels */}
+
                       <div className="absolute top-6.5 bg-stone-900/95 dark:bg-stone-950/95 border border-stone-800 text-[8px] font-sans font-extrabold text-[#F7E4A1] px-1.5 py-0.5 rounded shadow-sm whitespace-nowrap opacity-60 group-hover:opacity-100 transition-opacity">
                         {node.id === status ? (
                           <span className="text-[#F7E4A1] font-black">● {node.label}</span>
@@ -564,7 +557,7 @@ export default function TrackingMockMap({
                 );
               })}
 
-              {/* Animated Vehicle (Truck / Carrier) Marker */}
+ 
               {(() => {
                 const activeCoords = currentVehicleCoords;
                 const { x, y } = getRelativeXY(activeCoords);
@@ -598,7 +591,7 @@ export default function TrackingMockMap({
 
             </div>
 
-            {/* Bottom Alert Overlay (Sleek help link instead of a large block) */}
+
             <div className="z-10 py-1 px-2 pb-1.5 bg-[#FAF5E9]/90 dark:bg-stone-900/95 border border-stone-250/50 dark:border-stone-800/80 rounded-xl flex items-center justify-between text-[7px] font-sans select-none shadow-3xs backdrop-blur-xs">
               <span className="text-stone-500 font-semibold dark:text-stone-400 leading-none">
                 To view real Google Maps layouts, configure a GOOGLE_MAPS_PLATFORM_KEY secret in Settings.
@@ -615,7 +608,7 @@ export default function TrackingMockMap({
 
           </div>
         ) : (
-          /* High-Fidelity Real Google Map */
+
           <APIProvider apiKey={API_KEY} version="weekly">
             <div className="w-full h-full relative">
               <Map
@@ -627,14 +620,14 @@ export default function TrackingMockMap({
                 disableDefaultUI={true}
                 gestureHandling="cooperative"
               >
-                {/* Dynamically Bound to center everything */}
+
                 <FitBounds path={fullPathCoordinates} />
 
-                {/* Draw Polyline routes */}
+
                 <MapPolyline path={coveredPath} color="#10B981" isDashed={false} />
                 <MapPolyline path={remainingPath} color="#A8A29E" isDashed={true} />
 
-                {/* Interactive Milestone Marker Nodes */}
+              
                 {MILESTONES.map((node, idx) => {
                   const milestonePercent = idx * 25;
                   const isPassed = progressPercent >= milestonePercent || status === "DELIVERED";
@@ -648,7 +641,6 @@ export default function TrackingMockMap({
                           <div className={`absolute rounded-full -inset-0.5 ${themeAccent.ring} animate-ping duration-1000`} />
                         )}
 
-                        {/* Subtle bounce animation on milestone pin */}
                         <motion.div 
                           className={`w-7 h-7 rounded-full flex items-center justify-center border-2 shadow-xs transition-all duration-300 origin-bottom ${
                             isCurrentActive 
@@ -673,7 +665,7 @@ export default function TrackingMockMap({
                           <node.icon className="w-3.5 h-3.5 stroke-[2.5]" />
                         </motion.div>
 
-                        {/* Popover */}
+                 
                         <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex flex-col items-center pointer-events-none z-30">
                           <div className="bg-stone-900 border border-stone-800 text-stone-100 text-[10px] px-2.5 py-1 rounded-lg shadow-lg whitespace-nowrap flex flex-col items-center">
                             <span className="font-bold">{node.label}</span>
@@ -686,10 +678,10 @@ export default function TrackingMockMap({
                   );
                 })}
 
-                {/* Moving Carrier Marker */}
+      
                 <AdvancedMarker position={currentVehicleCoords}>
                   <div className="relative -translate-y-5 flex flex-col items-center select-none group cursor-pointer z-40">
-                    {/* Hover Tooltip inside Google Map */}
+             
                     <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 hidden group-hover:flex flex-col items-center pointer-events-none z-50">
                       <div className="bg-stone-950 border border-stone-800 text-stone-100 text-[10px] p-2 rounded-xl shadow-xl whitespace-nowrap flex flex-col gap-1 min-w-[155px] font-sans">
                         <div className="flex justify-between items-center border-b border-stone-850 pb-1 mb-1">
@@ -712,7 +704,7 @@ export default function TrackingMockMap({
                       <div className="w-1.5 h-1.5 bg-stone-950 rotate-45 -mt-1 shadow-md border-r border-b border-stone-800" />
                     </div>
 
-                    {/* Styled Badge */}
+            
                     <div className="bg-[#111E19] border border-stone-800 text-white px-2 py-1 rounded-xl shadow-md flex items-center gap-1.5">
                       <CarrierVehicleIcon className="w-3.5 h-3.5 text-[#F7E4A1] animate-pulse" />
                       <div className="flex flex-col select-none pr-1">
@@ -732,10 +724,10 @@ export default function TrackingMockMap({
 
       </div>
 
-      {/* Origin -> Destination Flow Leg Info */}
+   
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1 border-t border-stone-100 dark:border-stone-800 text-xs">
         
-        {/* Origin */}
+      
         <div className="bg-stone-50/70 dark:bg-[#121f1a]/40 p-3 rounded-2xl border border-stone-200/50 dark:border-stone-800/85">
           <span className="text-[9px] font-mono text-stone-400 dark:text-stone-500 uppercase font-bold tracking-wider">
             Consignment Origin Hub
@@ -749,7 +741,7 @@ export default function TrackingMockMap({
           </span>
         </div>
 
-        {/* Route Info Connector */}
+
         <div className="bg-stone-50/70 dark:bg-[#121f1a]/40 p-3 rounded-2xl border border-stone-200/50 dark:border-stone-800/85 flex flex-col justify-center items-center text-center">
           <span className="text-[9px] font-mono text-stone-400 dark:text-stone-500 uppercase font-bold tracking-wider">
             Transit Routing Lane
@@ -762,7 +754,7 @@ export default function TrackingMockMap({
           </span>
         </div>
 
-        {/* Destination Target */}
+      
         <div className="bg-stone-50/70 dark:bg-[#121f1a]/40 p-3 rounded-2xl border border-stone-200/50 dark:border-stone-800/85">
           <span className="text-[9px] font-mono text-stone-400 dark:text-stone-500 uppercase font-bold tracking-wider">
             Delivery Destination Node
@@ -778,7 +770,7 @@ export default function TrackingMockMap({
 
       </div>
 
-      {/* Legend Indicator Footnote */}
+    
       <div className="flex flex-wrap items-center justify-between gap-3 text-[10px] text-stone-400 dark:text-stone-500 font-sans tracking-wide mt-1 pt-1">
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-1">
@@ -795,7 +787,7 @@ export default function TrackingMockMap({
         </div>
       </div>
 
-      {/* Expanded Modal Dialog View */}
+
       <AnimatePresence>
         {isExpanded && hasValidKey && (
           <div 
@@ -811,7 +803,7 @@ export default function TrackingMockMap({
               className="bg-white dark:bg-[#0c1411] border border-stone-200 dark:border-stone-850 rounded-[28px] w-full max-w-5xl h-[85vh] flex flex-col md:flex-row overflow-hidden shadow-2xl relative text-stone-800 dark:text-stone-200"
             >
               
-              {/* Close Button */}
+      
               <button
                 type="button"
                 onClick={() => setIsExpanded(false)}
@@ -820,10 +812,10 @@ export default function TrackingMockMap({
                 <X className="w-4 h-4 stroke-[2.5]" />
               </button>
 
-              {/* Left Column: Enlarged interactive real Google map */}
+    
               <div className="flex-1 min-h-[40vh] md:min-h-0 bg-[#FAF7EE] dark:bg-[#060a08] relative p-6 flex flex-col border-b md:border-b-0 md:border-r border-stone-200 dark:border-stone-800">
                 
-                {/* Header in modal */}
+          
                 <div className="mb-4 pr-10">
                   <div className="flex items-center gap-2">
                     <span className="text-[9px] font-mono font-extrabold text-[#A35638] dark:text-[#F7E4A1] uppercase tracking-widest bg-[#FAF5E9] dark:bg-[#182a20] px-2.5 py-1 rounded-full border border-stone-200/50 dark:border-stone-800">
@@ -839,7 +831,6 @@ export default function TrackingMockMap({
                   </p>
                 </div>
 
-                {/* Larger Google Map Container */}
                 <div className="flex-1 relative bg-white dark:bg-[#080d0b] border border-stone-200/60 dark:border-stone-850/65 rounded-2xl overflow-hidden shadow-inner flex items-center justify-center">
                   
                   <APIProvider apiKey={API_KEY} version="weekly">
@@ -853,14 +844,14 @@ export default function TrackingMockMap({
                         disableDefaultUI={false}
                         gestureHandling="greedy"
                       >
-                        {/* Auto fit layout bounds */}
+
                         <FitBounds path={fullPathCoordinates} />
 
-                        {/* Covered routes and scheduled segments */}
+
                         <MapPolyline path={coveredPath} color="#10B981" isDashed={false} />
                         <MapPolyline path={remainingPath} color="#A8A29E" isDashed={true} />
 
-                        {/* Render Milestone Target Pins with bounce animation */}
+
                         {MILESTONES.map((node, idx) => {
                           const isPassed = idx <= currentStatusIndex;
                           const isCurrentActive = idx === currentStatusIndex;
@@ -897,7 +888,7 @@ export default function TrackingMockMap({
                                   <node.icon className="w-4 h-4 stroke-[2.5]" />
                                 </motion.div>
 
-                                {/* Popover */}
+
                                 <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1.5 hidden group-hover:flex flex-col items-center pointer-events-none z-30">
                                   <div className="bg-stone-900 border border-stone-800 text-stone-100 text-[10px] px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap flex flex-col items-center">
                                     <span className="font-bold">{node.label}</span>
@@ -910,7 +901,7 @@ export default function TrackingMockMap({
                           );
                         })}
 
-                        {/* Active moving vehicle with active coordinates indicator */}
+
                         <AdvancedMarker position={MILESTONE_COORDS[activeNode.id]}>
                           <div className="relative -translate-y-5 flex flex-col items-center select-none group cursor-pointer z-40">
                             <div className="bg-[#111E19] border border-stone-800 text-white px-2.5 py-1.5 rounded-2xl shadow-lg flex items-center gap-2">
@@ -931,7 +922,7 @@ export default function TrackingMockMap({
 
                 </div>
 
-                {/* Footer instructions */}
+
                 <div className="mt-4 flex items-center justify-between text-[10px] text-stone-400 dark:text-stone-400 font-sans font-medium">
                   <span>Interactive Real Google Maps Route - Dynamic Coordinates</span>
                   <span>Explore precise transport corridor legs on the Map widget directly.</span>
@@ -939,7 +930,7 @@ export default function TrackingMockMap({
 
               </div>
 
-              {/* Right Column: Telemetry list & detailed checks logs */}
+
               <div className="w-full md:w-80 bg-stone-55 dark:bg-[#090e0c]/60 flex flex-col p-6 overflow-y-auto border-t md:border-t-0 border-stone-200 dark:border-stone-850">
                 <div className="mb-6">
                   <span className="text-[9px] font-mono tracking-widest text-[#A35638] dark:text-[#F7E4A1] font-black uppercase">
@@ -953,10 +944,10 @@ export default function TrackingMockMap({
                   </p>
                 </div>
 
-                {/* Telemetry Stepper steps */}
+
                 <div className="flex-1 flex flex-col gap-5 justify-start relative">
                   
-                  {/* Decorative background thin timeline line */}
+
                   <div className="absolute left-[17px] top-4 bottom-4 w-0.5 bg-stone-200 dark:bg-stone-800 z-0" />
 
                   {MILESTONES.map((node, idx) => {
@@ -965,7 +956,7 @@ export default function TrackingMockMap({
                     
                     return (
                       <div key={"step-" + node.id} className="flex gap-4 items-start relative z-10">
-                        {/* Bullet Circle */}
+               
                         <div 
                           className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 border-2 shadow-8xs transition-colors duration-300 ${
                             isCurrentActive
@@ -978,7 +969,7 @@ export default function TrackingMockMap({
                           <node.icon className="w-4 h-4" />
                         </div>
 
-                        {/* Text Detail */}
+
                         <div className="flex flex-col min-w-0">
                           <div className="flex flex-wrap items-center gap-1.5">
                             <span className={`font-sans font-black text-xs uppercase tracking-wider ${
@@ -1003,7 +994,7 @@ export default function TrackingMockMap({
                             {node.desc} &bull; Verified logs check.
                           </p>
 
-                          {/* Dummy Timing Log metadata for realistic look */}
+
                           {isPassed && (
                             <span className="text-[8px] font-mono text-stone-400 dark:text-stone-550 flex items-center gap-1 mt-1 font-semibold">
                               <Clock className="w-2.5 h-2.5 text-stone-400 shrink-0" />
@@ -1016,7 +1007,7 @@ export default function TrackingMockMap({
                   })}
                 </div>
 
-                {/* Bottom specs metadata block */}
+
                 <div className="mt-6 pt-4 border-t border-stone-200 dark:border-stone-800 flex flex-col gap-2">
                   <div className="flex justify-between text-[10px]">
                     <span className="text-stone-400 dark:text-stone-500 font-mono">Assigned Carrier:</span>

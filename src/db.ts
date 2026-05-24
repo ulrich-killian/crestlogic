@@ -1,7 +1,3 @@
-/**
- * Shared Database Store for Crest Logistics Shipments
- */
-
 export interface ShipmentItem {
   name: string;
   qty: string;
@@ -104,7 +100,7 @@ export let COURIER_SHIPMENTS: Record<string, Shipment> = {
   }
 };
 
-// Global polyfill for Next.js multi-compilation persistence in development
+
 if (process.env.NODE_ENV !== "production") {
   const g = global as any;
   if (!g.COURIER_SHIPMENTS) {

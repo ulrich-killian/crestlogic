@@ -74,7 +74,7 @@ export default function App({
   onLoginSuccess,
   onLogout
 }: AppProps = {}) {
-  // Dark/Light theme state
+
   const [isDark, setIsDark] = useState(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("theme");
@@ -94,24 +94,24 @@ export default function App({
     }
   }, [isDark]);
 
-  // Navigation / View state
+ 
   const [activeTab, setActiveTab] = useState<"home" | "about" | "services" | "contact" | "track">("home");
-  const [isAdminMode, setIsAdminMode] = useState(forceAdminLogin || forceAdminDashboard); // Controls public portal vs admin dashboard view
+  const [isAdminMode, setIsAdminMode] = useState(forceAdminLogin || forceAdminDashboard); 
   const [adminSection, setAdminSection] = useState<"register" | "registry" | "simulator">("register");
 
-  // Admin authentication
+
   const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(forceAdminDashboard);
   const [adminUsername, setAdminUsername] = useState("admin");
   const [adminPassword, setAdminPassword] = useState("");
   const [authError, setAuthError] = useState<string | null>(null);
 
-  // Admin Registered Live State List from Server
+  
   const [serverShipments, setServerShipments] = useState<any[]>([]);
   const [shipmentToDelete, setShipmentToDelete] = useState<any | null>(null);
   const [serverSearchQuery, setServerSearchQuery] = useState("");
   const [sortField, setSortField] = useState<"date-desc" | "date-asc" | "weight-desc" | "weight-asc">("date-desc");
 
-  // Create Shipment Manifest Form variables
+
   const [adminFormData, setAdminFormData] = useState<ShipmentFormData>({
     orderId: generateTrackingId(),
     customerName: "",
@@ -123,7 +123,7 @@ export default function App({
     uploadedFiles: []
   });
 
-  // Domestic Shipping Form state
+
   const [domesticFormData, setDomesticFormData] = useState({
     shipDate: new Date().toISOString().split("T")[0],
     sender: "",
@@ -173,7 +173,7 @@ export default function App({
 
   const [lastCreatedDomesticWaybill, setLastCreatedDomesticWaybill] = useState<any | null>(null);
 
-  // Real-time dynamic route math & analyzer for domestic submissions
+
   const aiRouteAnalysis = useMemo(() => {
     const originStr = domesticFormData.senderAddress?.trim();
     const destinationStr = `${domesticFormData.recipientAddress || ''}, ${domesticFormData.recipientCityStateZip || ''}`.trim();
@@ -191,7 +191,7 @@ export default function App({
     const distanceKm = Math.round(getGeodesicDistance(startLoc, endLoc));
     const distanceMiles = Math.round(distanceKm * 0.621371);
 
-    // Dynamic travel speed calculation (80 km/h truck limits, 8 hours a day standard)
+
     const travellingHours = Number((distanceKm / 80).toFixed(1));
     const travellingDays = Math.max(1, Number((travellingHours / 8).toFixed(1)));
 
@@ -224,17 +224,17 @@ export default function App({
   const [dragActive, setDragActive] = useState(false);
   const [parsingLogs, setParsingLogs] = useState<string | null>(null);
   
-  // Create Shipment AI insights local storage state
+
   const [adminInsights, setAdminInsights] = useState<AiInsightsResponse | null>(null);
   const [isAdminAnalyzing, setIsAdminAnalyzing] = useState(false);
   const [adminAnalysisError, setAdminAnalysisError] = useState<string | null>(null);
 
-  // Newly issued waybill for active simulator tracking
+
   const [activeWaybill, setActiveWaybill] = useState<any | null>(null);
   const [editingShipment, setEditingShipment] = useState<any | null>(null);
   const [isSavingEdit, setIsSavingEdit] = useState(false);
 
-  // Live real-time path coordinate/address inputs
+
   const [liveOriginInput, setLiveOriginInput] = useState("");
   const [liveDestinationInput, setLiveDestinationInput] = useState("");
   const [liveCheckpointInput, setLiveCheckpointInput] = useState("");
@@ -251,7 +251,7 @@ export default function App({
     return Math.round(getGeodesicDistance(startLoc, endLoc));
   }, [liveOriginInput, liveDestinationInput]);
 
-  // Phone Simulator states
+
   const [simulatedNotifications, setSimulatedNotifications] = useState<Array<{
     type: "whatsapp" | "sms" | "email";
     title: string;
@@ -262,24 +262,24 @@ export default function App({
   const [isAlertSending, setIsAlertSending] = useState(false);
   const [alertSuccessMsg, setAlertSuccessMsg] = useState<string | null>(null);
 
-  // Public Tracking Search screen
+
   const [publicSearchQuery, setPublicSearchQuery] = useState("");
   const [publicFoundShipment, setPublicFoundShipment] = useState<any | null>(null);
   const [publicSearchError, setPublicSearchError] = useState<string | null>(null);
   const [publicSearching, setPublicSearching] = useState(false);
 
-  // Floating Help Chat support
+
   const [chatOpen, setChatOpen] = useState(false);
   const [chatMessage, setChatMessage] = useState("");
   const [chatHistory, setChatHistory] = useState<Array<{ sender: 'user' | 'bot', text: string }>>([
     { sender: 'bot', text: "Welcome to Crest Logistics Help Terminal. I am Crest AI Dispatch Agent. How can I guide your waybill lookup or routing today?" }
   ]);
 
-  // Contact page states
+
   const [contactForm, setContactForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [contactSubmitted, setContactSubmitted] = useState(false);
 
-  // Live timer clock
+
   const [timeStr, setTimeStr] = useState("2026-05-22 17:00:00 UTC");
   useEffect(() => {
     const updateTime = () => {
@@ -291,7 +291,7 @@ export default function App({
     return () => clearInterval(timer);
   }, []);
 
-  // Sync shipments archive from backend
+
   const fetchShipmentsDb = async () => {
     try {
       const res = await fetch("/api/shipments");
@@ -299,7 +299,7 @@ export default function App({
         const data = await res.json();
         setServerShipments(data);
       } else {
-        // Fallback to individual keys if route fails
+
         const defaults = ["CR-385901-LT", "CR-992104-LT"];
         const loaded: any[] = [];
         for (const id of defaults) {
@@ -324,7 +324,7 @@ export default function App({
     fetchShipmentsDb();
   }, []);
 
-  // Check URL parameters for direct Tracking link e.g. ?track=CR-385901-LT
+
   useEffect(() => {
     const searchParams = new URLSearchParams(window.location.search);
     const trackingFromUrl = searchParams.get("track");
@@ -335,7 +335,7 @@ export default function App({
     }
   }, []);
 
-  // Sync live inputs when lastCreatedDomesticWaybill or activeWaybill updates
+
   useEffect(() => {
     const focusedWaybill = activeWaybill || lastCreatedDomesticWaybill;
     if (focusedWaybill) {
@@ -347,7 +347,6 @@ export default function App({
     }
   }, [activeWaybill, lastCreatedDomesticWaybill]);
 
-  // Real-time polling for public tracking view
   useEffect(() => {
     if (!publicFoundShipment || activeTab !== "track") return;
     
@@ -356,7 +355,7 @@ export default function App({
         const response = await fetch(`/api/shipments/${publicFoundShipment.orderId}`);
         if (response.ok) {
           const data = await response.json();
-          // Avoid deep rerendering unless values actually changed
+     
           if (
             data.origin !== publicFoundShipment.origin || 
             data.destination !== publicFoundShipment.destination || 
@@ -374,13 +373,13 @@ export default function App({
     return () => clearInterval(interval);
   }, [publicFoundShipment?.orderId, activeTab]);
 
-  // Set active tab for client-side pages and hide admin mode
+
   const navigateToSegment = (sectionId: "home" | "about" | "services" | "contact" | "track") => {
-    setIsAdminMode(false); // Always exit admin dashboard when using public tabs
+    setIsAdminMode(false); 
     setActiveTab(sectionId);
   };
 
-  // Live query for customer package search against express backend database
+
   const handlePublicTrackSearch = async (e: React.FormEvent | null, specificCode?: string) => {
     if (e) e.preventDefault();
     const code = (specificCode || publicSearchQuery).trim().toUpperCase();
@@ -390,7 +389,7 @@ export default function App({
     setPublicSearchError(null);
     setPublicFoundShipment(null);
 
-    // Minor delay for a high fidelity professional simulation search feel
+
     await new Promise(resolve => setTimeout(resolve, 800));
 
     try {
@@ -407,7 +406,7 @@ export default function App({
     }
   };
 
-  // Secure login submit handler
+
   const handleAdminLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (adminUsername.trim() === "admin" && adminPassword === "admin2026") {
@@ -426,7 +425,7 @@ export default function App({
     }
   };
 
-  // OCR simulation parser
+
   const handleSimulateInvoiceOcr = (fileName: string) => {
     setParsingLogs(`Running OCR on ${fileName}...`);
     
@@ -451,7 +450,7 @@ export default function App({
           });
           setParsingLogs(`OCR Successful: Loaded ${sample.items.length} cargo rows cleanly.`);
         } else {
-          // Fallback parsing logic
+
           const genericItems = [
             { id: "parsed-1", name: `Premium Spares (${fileName})`, qty: 25 },
             { id: "parsed-2", name: "High-Tensile Protective Structural Wraps", qty: 2 }
@@ -473,7 +472,6 @@ export default function App({
     }, 1200);
   };
 
-  // Manage manifest dynamic rows
   const handleAddCargoRow = () => {
     const nextId = `item-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`;
     setAdminFormData({
@@ -500,7 +498,7 @@ export default function App({
     });
   };
 
-  // Run AI Optimization routing backend pipeline
+
   const handleTriggerAiOptimization = async () => {
     if (!adminFormData.customerName) {
       setAdminAnalysisError("Please provide a consignee name prior to invoking the AI Agent.");
@@ -528,7 +526,7 @@ export default function App({
     }
   };
 
-  // POST newly issued shipment to express database array
+
   const handleRegisterShipmentTicket = async () => {
     if (!adminFormData.customerName || !adminFormData.destination) {
       setAdminAnalysisError("Cannot issue waybill ticket: Consignee name and destination terminal are strictly required.");
@@ -552,21 +550,21 @@ export default function App({
       const resData = await response.json();
       const finalShipment = resData.shipment;
 
-      // Update local state archives
+
       setServerShipments(prev => {
         const filtered = prev.filter(s => s.orderId !== finalShipment.orderId);
         return [finalShipment, ...filtered];
       });
 
-      // Save as active for simulation notification
+   
       setActiveWaybill(finalShipment);
-      setAdminSection("simulator"); // Transition to notify the buyer!
+      setAdminSection("simulator"); 
       
-      // Auto-populate some notification templates inside our phone mock
+      
       const link = `${window.location.origin}/?track=${finalShipment.orderId}`;
       setSimulatedNotifications([]);
 
-      // Reset Create Form
+   
       setAdminFormData({
         orderId: generateTrackingId(),
         customerName: "",
@@ -585,7 +583,7 @@ export default function App({
     }
   };
 
-  // POST newly issued domestic shipment waybill
+
   const handleRegisterDomesticWaybill = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!domesticFormData.recipientTo || !domesticFormData.recipientAddress || !domesticFormData.recipientCityStateZip) {
@@ -597,7 +595,7 @@ export default function App({
       return;
     }
 
-    // Generate unique tracking code for domestic package
+  
     const uniqueId = `CR-${Math.floor(200000 + Math.random() * 700000)}-US`;
 
     const dynamicInsights = {
@@ -647,13 +645,13 @@ export default function App({
       const resData = await response.json();
       const finalShipment = resData.shipment;
 
-      // Update local state archives
+     
       setServerShipments(prev => {
         const filtered = prev.filter(s => s.orderId !== finalShipment.orderId);
         return [finalShipment, ...filtered];
       });
 
-      // Save as active for simulation notification
+    
       setActiveWaybill(finalShipment);
       setLastCreatedDomesticWaybill(finalShipment);
       
@@ -679,7 +677,7 @@ export default function App({
     }
   };
 
-  // Admin Dynamic Route Hub updates
+
   const handleUpdateWaybillHubs = async () => {
     const focusedWaybill = activeWaybill || lastCreatedDomesticWaybill;
     if (!focusedWaybill) return;
@@ -721,7 +719,6 @@ export default function App({
         origin: liveOriginInput,
         destination: liveDestinationInput,
         transitCheckpoint: liveCheckpointInput,
-        // Also update destination in main attributes
         destinationAddress: liveDestinationInput,
         hoursDriven: liveHoursDriven,
         distanceCovered: liveDistanceCovered,
@@ -745,14 +742,14 @@ export default function App({
       const resData = await response.json();
       const finalShipment = resData.shipment;
 
-      // Update local state archives
+   
       setServerShipments(prev => prev.map(s => s.orderId === finalShipment.orderId ? finalShipment : s));
       
       if (lastCreatedDomesticWaybill && lastCreatedDomesticWaybill.orderId === finalShipment.orderId) {
         setLastCreatedDomesticWaybill(finalShipment);
       }
       
-      // Update activeWaybill too if focused
+    
       if (activeWaybill && activeWaybill.orderId === finalShipment.orderId) {
         setActiveWaybill(finalShipment);
       }
@@ -768,7 +765,7 @@ export default function App({
     }
   };
 
-  // Dispatch message sender simulation
+
   const handleSendDynamicNotification = (isLinkOnly: boolean = false) => {
     if (!lastCreatedDomesticWaybill) return;
     
@@ -783,7 +780,7 @@ export default function App({
         ? `[Crest Tracking Link] Tap to view your delivery map: ${window.location.origin}/?track=${lastCreatedDomesticWaybill.orderId}`
         : domesticMessageDraft;
 
-      // Add to simulated log notifications
+  
       setSimulatedNotifications(prev => [
         {
           type: dispatchChannel === "phone" ? "sms" : dispatchChannel,
@@ -799,7 +796,7 @@ export default function App({
     }, 900);
   };
 
-  // Simulate notification alert to buyer's phone mock
+
   const simulateRecipientDispatch = (type: "whatsapp" | "sms" | "email") => {
     if (!activeWaybill) return;
     setIsAlertSending(true);
@@ -838,18 +835,18 @@ export default function App({
       ]);
 
       setAlertSuccessMsg(`Simulated ${type.toUpperCase()} message dispatch triggered. Recipient mobile node received update!`);
-      // Visual feedback dissolve
+     
       setTimeout(() => setAlertSuccessMsg(null), 5000);
     }, 1000);
   };
 
-  // Admin dynamic control: update milestones on database
+
   const updateShipmentMilestoneOnServer = async (id: string, nextStatus: string) => {
-    // Find matching shipment to edit
+
     const found = serverShipments.find(s => s.orderId === id);
     if (!found) return;
 
-    // Build next custom history point
+
     let desc = "Status updated by admin console operator.";
     let loc = "Crest Logistics Transgress Terminal";
 
@@ -881,7 +878,7 @@ export default function App({
     };
 
     try {
-      // Post updated item to db
+
       const response = await fetch("/api/register-shipment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -894,7 +891,7 @@ export default function App({
       if (response.ok) {
         setServerShipments(prev => prev.map(s => s.orderId === id ? updatedShipment : s));
         
-        // If the public user is currently looking at this active waybill tracker, refresh it!
+
         if (publicFoundShipment && publicFoundShipment.orderId === id) {
           setPublicFoundShipment(updatedShipment);
         }
@@ -904,7 +901,7 @@ export default function App({
     }
   };
 
-  // Delete a shipment from the database
+
   const deleteShipmentFromServer = async (id: string) => {
     try {
       const response = await fetch(`/api/shipments/${id}`, {
@@ -921,7 +918,7 @@ export default function App({
     }
   };
 
-  // Active chat response agent simulation
+
   const handleSendChatMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!chatMessage.trim()) return;
@@ -945,7 +942,7 @@ export default function App({
     }, 700);
   };
 
-  // Contact form submission
+
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setContactSubmitted(true);
@@ -958,13 +955,11 @@ export default function App({
   return (
     <div className="min-h-screen bg-[#FAF5E9] dark:bg-[#070c0a] text-[#111E19] dark:text-stone-100 flex flex-col font-sans antialiased selection:bg-[#F7E4A1] selection:text-[#111E19]">
       
-      {/* =========================================================
-          GLOBAL CORPORATE HEADER (PUBLIC CONSOLE NAVIGATION)
-         ========================================================= */}
+
       <header className="w-full bg-white dark:bg-[#0c1411] border-b border-stone-200/60 dark:border-stone-800 shadow-xs sticky top-0 z-50 transition-colors">
         <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
           
-          {/* Logo Brand with container ship concept */}
+
           <div 
             onClick={() => navigateToSegment("home")}
             className="flex items-center gap-3 cursor-pointer group"
@@ -987,7 +982,7 @@ export default function App({
             </div>
           </div>
 
-          {/* Desktop Single-page Routing Links */}
+        
           <nav className="hidden lg:flex items-center gap-1.5">
             <button
               onClick={() => { setIsAdminMode(false); setActiveTab("home"); }}
@@ -1041,9 +1036,9 @@ export default function App({
             </button>
           </nav>
 
-          {/* Dynamic Nodes utility & Operator Action */}
+   
           <div className="flex items-center gap-3">
-            {/* Theme Toggle Button */}
+     
             <button
               onClick={() => setIsDark(!isDark)}
               className="p-2.5 rounded-xl border border-stone-200/60 hover:bg-stone-50 text-stone-600 dark:border-stone-800 dark:hover:bg-[#121f1a] dark:text-stone-300 transition-colors shadow-2xs cursor-pointer flex items-center justify-center"
@@ -1053,7 +1048,7 @@ export default function App({
               {isDark ? <Sun className="w-4 h-4 text-[#F7E4A1]" /> : <Moon className="w-4 h-4 text-stone-600" />}
             </button>
 
-            {/* Direct Admin Control Room Switcher */}
+        
             {!forcePublic && !forceAdminLogin && !forceAdminDashboard && (
               <button
                 onClick={() => setIsAdminMode(!isAdminMode)}
@@ -1072,13 +1067,11 @@ export default function App({
         </div>
       </header>
 
-      {/* =========================================================
-          ADMIN MODE OVERLAY (CORE OPERATIONS CONSOLE WINDOW)
-         ========================================================= */}
+
       {isAdminMode ? (
         <div className="flex-grow flex flex-col">
           {!isAdminLoggedIn ? (
-            /* SECURE PASSWORD LOGIN SCREEN */
+          
             <div className="flex-grow flex items-center justify-center p-6 bg-[#FAF5E9]">
               <div className="w-full max-w-md bg-white border border-stone-200/60 rounded-3xl p-8 shadow-lg flex flex-col gap-6">
                 <div className="text-center">
@@ -1140,10 +1133,10 @@ export default function App({
               </div>
             </div>
           ) : (
-            /* LOGGED-IN: CREST LOGISTICS CONTROL TOWER DASHBOARD */
+       
             <div className="flex-grow flex flex-col lg:flex-row bg-[#FAF5E9]">
               
-              {/* Sidebar Menu Panel */}
+            
               <aside className="w-full lg:w-64 bg-white border-b lg:border-r border-stone-200/60 p-5 flex flex-col gap-6 shrink-0">
                 <div className="pb-4 border-b border-stone-100 flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-[#FAF5E9] text-[#A35638] flex items-center justify-center border border-stone-200/50">
@@ -1155,7 +1148,7 @@ export default function App({
                   </div>
                 </div>
 
-                {/* Sidebar Navigation */}
+     
                 <nav className="flex flex-row lg:flex-col gap-1.5 overflow-x-auto lg:overflow-visible font-sans">
                   <button
                     onClick={() => setAdminSection("register")}
@@ -1217,10 +1210,10 @@ export default function App({
                 </div>
               </aside>
 
-              {/* Main Workspace Frame */}
+        
               <main className="flex-1 p-6 md:p-8 flex flex-col gap-6 overflow-y-auto max-w-7xl">
                 
-                {/* Admin Top Title Banner */}
+           
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white border border-stone-200/60 p-5 rounded-2xl shadow-2xs">
                   <div>
                     <h2 className="text-xl font-sans font-black text-[#111E19] tracking-tight uppercase">
@@ -1236,17 +1229,17 @@ export default function App({
                   </div>
                 </div>
 
-                {/* ADMIN SECTIONS RENDERING */}
+           
                 {adminSection === "register" && (
                   <div className="flex flex-col gap-8 w-full">
                     
-                    {/* WAYBILL ISSUANCE & DISPATCH WORKSPACE CONTAINER */}
+               
                     <div className="bg-[#FAF5E9] border border-stone-200/50 rounded-3xl p-4 md:p-8 shadow-xs flex flex-col gap-6">
                       
-                      {/* Success Dispatch Terminal - Shows when a waybill is successfully issued */}
+                      
                       {lastCreatedDomesticWaybill ? (
                         <div className="bg-white border-2 border-[#A35638]/30 rounded-2xl p-6 shadow-md flex flex-col md:flex-row gap-6 animate-fadeIn">
-                          {/* Left Column: Confirmation & Copy Info */}
+                
                           <div className="md:w-1/2 flex flex-col gap-4">
                             <div className="flex items-center gap-3 bg-emerald-50 text-emerald-800 border border-emerald-200/50 px-4 py-3 rounded-xl">
                               <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
@@ -1358,7 +1351,7 @@ export default function App({
                             <button
                               type="button"
                               onClick={() => {
-                                // Reset form
+                               
                                 setDomesticFormData({
                                   shipDate: new Date().toISOString().split("T")[0],
                                   sender: "",
@@ -1414,14 +1407,13 @@ export default function App({
                             </button>
                           </div>
 
-                          {/* Right Column: Automated Message Broadcast Tool */}
                           <div className="md:w-1/2 border-l border-stone-100 md:pl-6 flex flex-col gap-4">
                             <div>
                               <h4 className="font-sans font-black text-[#111E19] text-sm uppercase">AUTOMATED BROADCAST DISPATCH</h4>
                               <p className="text-[11px] text-stone-500 font-sans mt-0.5">Collect recipient details and dispatch custom alerts or direct tracking link instantly.</p>
                             </div>
 
-                            {/* Collect user contact data */}
+                    
                             <div className="flex flex-col gap-2">
                               <label className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-stone-500">
                                 1. Recipient Phone / WhatsApp / Email
@@ -1435,7 +1427,7 @@ export default function App({
                               />
                             </div>
 
-                            {/* Channel select tabs */}
+                    
                             <div className="flex flex-col gap-2">
                               <label className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-stone-500">
                                 2. Dispatch Channel Network
@@ -1474,7 +1466,7 @@ export default function App({
                               </div>
                             </div>
 
-                            {/* Draft Editor */}
+                    
                             <div className="flex flex-col gap-1.5">
                               <label className="text-[10px] font-sans font-extrabold uppercase tracking-wider text-stone-500">
                                 3. Review Automated Message Template Draft
@@ -1486,7 +1478,7 @@ export default function App({
                               />
                             </div>
 
-                            {/* Action rows */}
+                 
                             <div className="grid grid-cols-2 gap-2 mt-1">
                               <button
                                 type="button"
@@ -1515,10 +1507,10 @@ export default function App({
                         </div>
                       ) : (
                         
-                        /* RENDER THE DOMESTIC VOUCHER APPLET FORM */
+                   
                         <form onSubmit={handleRegisterDomesticWaybill} className="bg-white border border-stone-200/60 rounded-3xl p-5 md:p-8 shadow-xs flex flex-col gap-6 selection:bg-[#F7E4A1]">
                           
-                          {/* Formal Header block */}
+       
                           <div className="text-center pb-5 border-b-2 border-[#111E19] flex flex-col items-center justify-center">
                             <h3 className="font-sans font-black text-[#111E19] text-xl md:text-2xl tracking-widest uppercase">PACKAGE SHIPPING FORM</h3>
                             <span className="font-sans font-bold text-xs bg-[#F7E4A1] text-[#111E19] px-4 py-0.5 rounded-full mt-2 tracking-widest uppercase">
@@ -1526,9 +1518,9 @@ export default function App({
                             </span>
                           </div>
 
-                          {/* SECTION 2: ORIGIN & DESTINATION */}
+                
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
-                            {/* Left Column: Sender Info */}
+              
                             <div className="flex flex-col gap-4 border-r-0 md:border-r border-stone-100 md:pr-6">
                               <h4 className="text-[11px] font-sans font-black tracking-widest text-[#A35638] uppercase border-b border-stone-100 pb-1.5 flex items-center gap-1">
                                 <span>1. SENDER INFORMATION (ORIGIN)</span>
@@ -1600,7 +1592,7 @@ export default function App({
                                 </div>
                               </div>
 
-                              {/* Nested Accounting detailed row */}
+                  
                               <div className="bg-stone-50/70 border border-stone-200/50 p-3 rounded-2xl flex flex-col gap-2">
                                 <span className="text-[9px] font-mono font-black text-stone-400 tracking-wider">FINANCIAL LEDGER ACCOUNTS</span>
                                 <div className="grid grid-cols-3 gap-2">
@@ -1638,14 +1630,14 @@ export default function App({
                               </div>
                             </div>
 
-                            {/* Right Column: Recipient info */}
+                    
                             <div className="flex flex-col gap-4">
                               <div className="flex items-center justify-between border-b border-stone-100 pb-1.5">
                                 <h4 className="text-[11px] font-sans font-black tracking-widest text-[#A35638] uppercase flex items-center gap-1">
                                   <span>2. RECIPIENT INFORMATION (DESTINATION)</span>
                                 </h4>
                                 
-                                {/* Address Type Selector */}
+           
                                 <div className="flex bg-stone-100 border border-stone-200 p-0.5 rounded-lg text-[9px] font-sans font-bold">
                                   <button
                                     type="button"
@@ -1733,7 +1725,7 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* DYNAMIC REAL-TIME AI TRANSIT ANALYZER */}
+                   
                           {aiRouteAnalysis && (
                             <div className="bg-[#111E19] border border-stone-800 text-stone-100 rounded-3xl p-5 md:p-6 shadow-md flex flex-col md:flex-row justify-between gap-6 items-stretch animate-fadeIn">
                               <div className="flex-1 flex flex-col justify-between">
@@ -1777,9 +1769,9 @@ export default function App({
                             </div>
                           )}
 
-                          {/* SECTION 3: BILLING & SERVICES (TWO COLS) */}
+                  
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-stone-100 pt-5">
-                            {/* Left Block: Payment Method */}
+            
                             <div className="bg-stone-50/50 p-4 rounded-2xl border border-stone-200/50 flex flex-col gap-3">
                               <h4 className="text-[10px] font-sans font-black text-[#111E19] tracking-wider uppercase border-b border-stone-200/30 pb-1">
                                 3... CHOOSE PAYMENT METHOD
@@ -1840,7 +1832,7 @@ export default function App({
                                   <span>Bill Credit Card (Shipper Vault)</span>
                                 </label>
 
-                                {/* Bill 3rd party with Account # */}
+                         
                                 <div className="flex flex-col gap-1.5">
                                   <label className="flex items-center gap-2 cursor-pointer font-medium selection:bg-none">
                                     <input
@@ -1870,7 +1862,7 @@ export default function App({
                                   )}
                                 </div>
 
-                                {/* Bill recipient's acct */}
+       
                                 <div className="flex flex-col gap-1.5">
                                   <label className="flex items-center gap-2 cursor-pointer font-medium selection:bg-none">
                                     <input
@@ -1902,7 +1894,7 @@ export default function App({
                               </div>
                             </div>
 
-                            {/* Right Block: U.S. Postal Services */}
+              
                             <div className="bg-stone-50/50 p-4 rounded-2xl border border-stone-200/50 flex flex-col gap-3">
                               <h4 className="text-[10px] font-sans font-black text-[#111E19] tracking-wider uppercase border-b border-stone-200/30 pb-1">
                                 4... U...S. POSTAL PACKAGE SERVICES
@@ -1951,7 +1943,7 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* SECTION 4: FEDEX SHIPPING MATRIX */}
+             
                           <div className="border-t border-stone-100 pt-5 flex flex-col gap-3">
                             <div className="flex justify-between items-center bg-stone-100/60 p-2 px-3 rounded-xl">
                               <h4 className="text-[11px] font-sans font-black text-[#111E19] uppercase tracking-wider">
@@ -1960,10 +1952,10 @@ export default function App({
                               <span className="text-[9px] bg-[#A35638] text-white px-2 py-0.5 rounded font-mono font-bold">CHOOSE 1 SERVICE ROW</span>
                             </div>
 
-                            {/* 5-Column Responsive Services Grid Layout */}
+                      
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 mt-1.5 text-xs font-sans text-stone-700">
                               
-                              {/* Option A: Priority Overnight */}
+                          
                               <div className={`border rounded-xl p-3 flex flex-col gap-2.5 transition-all ${
                                 domesticFormData.fedexServiceTier === "PriorityOvernight" 
                                 ? "bg-[#FAF5E9]/50 border-[#A35638] ring-1 ring-[#A35638]" 
@@ -1994,7 +1986,7 @@ export default function App({
                                 )}
                               </div>
 
-                              {/* Option B: Standard Overnight */}
+                     
                               <div className={`border rounded-xl p-3 flex flex-col gap-2.5 transition-all ${
                                 domesticFormData.fedexServiceTier === "StandardOvernight" 
                                 ? "bg-[#FAF5E9]/50 border-[#A35638] ring-1 ring-[#A35638]" 
@@ -2025,7 +2017,7 @@ export default function App({
                                 )}
                               </div>
 
-                              {/* Option C: FedEx 2-Day */}
+                        
                               <div className={`border rounded-xl p-3 flex flex-col gap-2.5 transition-all ${
                                 domesticFormData.fedexServiceTier === "FedEx2Day" 
                                 ? "bg-[#FAF5E9]/50 border-[#A35638] ring-1 ring-[#A35638]" 
@@ -2056,7 +2048,7 @@ export default function App({
                                 )}
                               </div>
 
-                              {/* Option D: Express Saver */}
+                     
                               <div className={`border rounded-xl p-3 flex flex-col gap-2.5 transition-all ${
                                 domesticFormData.fedexServiceTier === "ExpressSaver" 
                                 ? "bg-[#FAF5E9]/50 border-[#A35638] ring-1 ring-[#A35638]" 
@@ -2087,7 +2079,7 @@ export default function App({
                                 )}
                               </div>
 
-                              {/* Option E: Ground */}
+                           
                               <div className={`border rounded-xl p-3 flex flex-col gap-2.5 transition-all ${
                                 domesticFormData.fedexServiceTier === "Ground" 
                                 ? "bg-[#FAF5E9]/50 border-[#A35638] ring-1 ring-[#A35638]" 
@@ -2120,9 +2112,9 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* SECTION 5: SURCHARGES & INSURANCE */}
+               
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-stone-100 pt-5">
-                            {/* FedEx Delivery surcharges */}
+             
                             <div className="flex flex-col gap-2">
                               <h4 className="text-[10px] font-sans font-black text-[#111E19] tracking-wider uppercase border-b border-stone-100 pb-1">
                                 6... FEDEX DELIVERY SPECIAL SURCHARGES
@@ -2161,7 +2153,7 @@ export default function App({
                               </div>
                             </div>
 
-                            {/* Insurance Section */}
+                     
                             <div className="bg-[#FAF5E9]/50 border border-[#FAF5E9] p-4 rounded-2xl flex flex-col gap-3">
                               <h4 className="text-[10px] font-sans font-black text-[#A35638] tracking-wider uppercase border-b border-stone-200/50 pb-1">
                                 7... ADDITIONAL INSURANCE COVERAGE
@@ -2200,13 +2192,13 @@ export default function App({
                             </div>
                           </div>
 
-                           {/* SECTION 5.5: CORE CRATE DATA (WEIGHT & PAYMENT) */}
+                    
                           <div className="border-t border-stone-150 pt-5 flex flex-col gap-3.5">
                             <h4 className="text-[11px] font-sans font-black text-[#111E19] uppercase tracking-wider bg-stone-100/60 p-2 px-3 rounded-xl">
                               5.5 CORE PACKAGE METRICS &amp; BILLING METHOD
                             </h4>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                              {/* Numeric package weight & unit selector */}
+                      
                               <div>
                                 <label className="block text-[10px] font-sans font-black uppercase text-stone-500 mb-1">
                                   Package Weight
@@ -2232,7 +2224,7 @@ export default function App({
                                 </div>
                               </div>
 
-                              {/* Billing Method selection menu */}
+                  
                               <div>
                                 <label className="block text-[10px] font-sans font-black uppercase text-stone-500 mb-1">
                                   Payment Method
@@ -2252,7 +2244,7 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* SECTION 6: PROCESS SYSTEM LOG VALUE */}
+                 
                           <div className="border-t border-stone-150 pt-5 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans text-stone-600">
                             <div>
                               <label className="block text-[9px] uppercase tracking-wider text-stone-400 font-semibold mb-1">PROCESSED BY (OPERATOR PIN/ID)</label>
@@ -2274,8 +2266,7 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* Submit Actions */}
-                          <div className="flex flex-col gap-3 pt-3 border-t border-stone-100">
+                   <div className="flex flex-col gap-3 pt-3 border-t border-stone-100">
                             <button
                               type="submit"
                               disabled={isAdminAnalyzing}
@@ -2292,7 +2283,7 @@ export default function App({
                             )}
                           </div>
 
-                          {/* Formal revision footer metadata */}
+                   
                           <div className="text-center text-[10px] font-mono text-stone-400 border-t border-stone-100 pt-4 flex items-center justify-between">
                             <span>CREST OPERATIONAL ARCHIVES DEPT</span>
                             <span>Rev 11/1/13</span>
@@ -2306,7 +2297,7 @@ export default function App({
                 )}
 
                 {adminSection === "registry" && (
-                  /* SECTION B: LOGS & SHIPMENTS ARCHIVE DATABASE TABLE */
+           
                   <div className="bg-white border border-stone-200/60 rounded-3xl p-6 shadow-xs flex flex-col gap-5">
                     
                     <div className="flex justify-between items-center pb-3 border-b border-stone-100 flex-col lg:flex-row gap-3">
@@ -2321,7 +2312,7 @@ export default function App({
                       </div>
 
                       <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
-                        {/* Sort Dropdown Component */}
+         
                         <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 px-3.5 py-2.5 rounded-xl text-xs w-full sm:w-auto group hover:border-[#A35638] transition-colors">
                           <span className="text-[#A35638] font-black uppercase tracking-wider text-[9px] whitespace-nowrap">
                             Sort By:
@@ -2339,7 +2330,7 @@ export default function App({
                           </select>
                         </div>
 
-                        {/* Search Input */}
+           
                         <div className="relative w-full sm:w-64">
                           <Search className="w-4 h-4 text-stone-400 absolute left-3.5 top-3" />
                           <input
@@ -2401,7 +2392,7 @@ export default function App({
                                   {shipment.weight} kg
                                 </td>
                                 <td className="py-3 px-4">
-                                  {/* Live dropdown status controller */}
+                     
                                   <select
                                     className={`text-[11px] font-sans font-extrabold uppercase rounded-lg border border-stone-200 px-2 py-1 focus:outline-none focus:border-[#A35638] ${
                                       shipment.status === "MANIFEST_CREATED" ? "bg-stone-100 text-stone-600" :
@@ -2454,10 +2445,10 @@ export default function App({
                 )}
 
                 {adminSection === "simulator" && (
-                  /* SECTION C: RECIPIENT DISPATCH WIRELESS NOTIFICATION SIMULATOR */
+              
                   <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                     
-                    {/* Left Panel: Selector controller triggers */}
+             
                     <div className="lg:col-span-6 bg-white border border-stone-200/60 rounded-3xl p-5 md:p-7 shadow-xs flex flex-col gap-6">
                       
                       <div>
@@ -2488,7 +2479,7 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* Live Dynamic Route Alteration Widget inside focus card */}
+                     
                           <div className="border border-stone-250/70 bg-white rounded-xl p-3 flex flex-col gap-2.5 shadow-3xs">
                             <div className="flex items-center gap-2">
                               <span className="w-1.5 h-1.5 rounded-full bg-[#A35638]" />
@@ -2510,7 +2501,7 @@ export default function App({
                                 />
                               </div>
 
-                              {/* Geodesic Driving Progress and Controls */}
+                        
                               <div className="bg-stone-50 border border-stone-200 rounded-xl p-3 flex flex-col gap-3">
                                 <div className="flex justify-between items-center text-[10px] font-sans font-black uppercase text-[#111E19]">
                                   <span>🚗 Driving Telemetry Control</span>
@@ -2661,20 +2652,20 @@ export default function App({
                       )}
                     </div>
 
-                    {/* Right Panel: Smartphone Visual Mock Frame */}
+             
                     <div className="lg:col-span-6 flex justify-center py-4 shrink-0">
                       <div className="w-80 h-[480px] bg-stone-900 rounded-[3rem] border-4 border-stone-800 p-3 shadow-2xl relative flex flex-col overflow-hidden">
                         
-                        {/* Smartphone Speaker notch */}
+                   
                         <div className="w-24 h-4 bg-stone-800 rounded-b-xl mx-auto absolute top-0 left-1/2 -translate-x-1/2 z-20 flex items-center justify-center gap-1.5">
                           <div className="w-8 h-1 bg-stone-700 rounded-full" />
                           <div className="w-1.5 h-1.5 bg-stone-600 rounded-full" />
                         </div>
 
-                        {/* Mobile Screen interior */}
+                  
                         <div className="flex-grow bg-slate-950 rounded-[2.5rem] relative p-4 pt-6 flex flex-col gap-3 font-sans overflow-y-auto overflow-x-hidden text-white sm-screen">
                           
-                          {/* Top Status Bar */}
+                 
                           <div className="flex justify-between items-center text-[10px] font-mono text-stone-400 border-b border-white/5 pb-1">
                             <span>CR-MOBILE</span>
                             <div className="flex gap-1 items-center">
@@ -2683,7 +2674,7 @@ export default function App({
                             </div>
                           </div>
 
-                          {/* Live message notification stream inside mobile chassis */}
+                      
                           <div className="flex flex-col gap-3">
                             <AnimatePresence>
                               {simulatedNotifications.length > 0 ? (
@@ -2703,8 +2694,7 @@ export default function App({
                                       <p className="text-[10px] font-bold text-stone-300">From: {notif.sender}</p>
                                       <p className="text-[10px] text-stone-400 leading-normal mt-1 whitespace-pre-wrap">{notif.text}</p>
                                     </div>
-                                    
-                                    {/* Action redirect mock link */}
+                            
                                     <div className="border-t border-white/5 pt-1.5 mt-1 flex justify-between items-center text-[9px] text-[#F7E4A1] font-bold uppercase tracking-wider">
                                       <span>Click to Track live</span>
                                       <ChevronRight className="w-3 h-3 text-[#A35638]" />
@@ -2736,13 +2726,9 @@ export default function App({
           )}
         </div>
       ) : (
-        /* =========================================================
-            PUBLIC PORTAL (CLIENT-FACING SECTIONS)
-           ========================================================= */
+
         <div className="flex-grow">
-          {/* ====================================
-              1. HOME SECTION (HERO SHUTTLE SPLASH)
-              ==================================== */}
+
           {activeTab === "home" && (
             <div className="flex flex-col">
               <section 
@@ -2752,7 +2738,7 @@ export default function App({
                   backgroundImage: `linear-gradient(to right, rgba(17, 30, 25, 0.93), rgba(17, 30, 25, 0.78)), url('https://images.unsplash.com/photo-1578575437130-527eed3abbec?auto=format&fit=crop&q=80&w=1600')`
                 }}
               >
-                {/* Ambient lighting */}
+             
                 <div className="absolute top-0 left-1/4 w-96 h-96 bg-[#F7E4A1]/10 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative max-w-5xl mx-auto w-full text-center flex flex-col items-center z-10 text-white px-2">
@@ -2783,7 +2769,7 @@ export default function App({
                     Delivering secure overland freight, multimodal bulk, and priority sea containers with automated machine tracking. Enter your waybill below for instant visual tracking maps of your consignment.
                   </motion.p>
 
-                  {/* Central Tracking input form */}
+                
                   <form 
                     onSubmit={(e) => {
                       e.preventDefault();
@@ -2812,7 +2798,7 @@ export default function App({
                     </button>
                   </form>
 
-                  {/* Micro stats overlay */}
+             
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full max-w-4xl mt-14 pt-8 border-t border-white/15 text-center">
                     <div>
                       <p className="text-[#F7E4A1] text-xl sm:text-2xl font-mono font-black">99.8%</p>
@@ -2832,7 +2818,7 @@ export default function App({
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
+
                   <div className="mt-10 flex flex-col sm:flex-row gap-4 mb-4">
                     <button
                       onClick={() => { setActiveTab("track"); }}
@@ -2852,7 +2838,7 @@ export default function App({
                 </div>
               </section>
 
-              {/* Essential Shipment Operations Showcase (Vibe Grid) */}
+         
               <div className="bg-[#FAF5E9]/50 py-20 px-6 border-t border-stone-200/50">
                 <div className="max-w-6xl mx-auto flex flex-col gap-10">
                   <div className="text-center">
@@ -2864,7 +2850,7 @@ export default function App({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {/* Photo 1: Deep Port Hand-off */}
+         
                     <div className="bg-white border border-stone-200/60 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-shadow group">
                       <div className="h-56 overflow-hidden relative">
                         <img 
@@ -2885,7 +2871,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* Photo 2: Heavy Overland Fleet */}
+                
                     <div className="bg-white border border-stone-200/60 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-shadow group">
                       <div className="h-56 overflow-hidden relative">
                         <img 
@@ -2906,7 +2892,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* Photo 3: Smart Sorting Depot */}
+               
                     <div className="bg-white border border-stone-200/60 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-shadow group">
                       <div className="h-56 overflow-hidden relative">
                         <img 
@@ -2942,7 +2928,7 @@ export default function App({
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    {/* Review 1 - Jaime Guaman */}
+     
                     <div className="bg-white dark:bg-[#0c1411] border border-stone-200/60 dark:border-stone-800 rounded-3xl p-6 shadow-3xs flex flex-col justify-between hover:shadow-xs transition-shadow">
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-1">
@@ -2971,7 +2957,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* Review 2 - John Wilson */}
+    
                     <div className="bg-white dark:bg-[#0c1411] border border-stone-200/60 dark:border-stone-800 rounded-3xl p-6 shadow-3xs flex flex-col justify-between hover:shadow-xs transition-shadow">
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-1">
@@ -3000,7 +2986,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* Review 3 - Carlos Jackson Hewitt */}
+            
                     <div className="bg-white dark:bg-[#0c1411] border border-stone-200/60 dark:border-stone-800 rounded-3xl p-6 shadow-3xs flex flex-col justify-between hover:shadow-xs transition-shadow">
                       <div className="flex flex-col gap-4">
                         <div className="flex items-center gap-1">
@@ -3032,10 +3018,10 @@ export default function App({
                 </div>
               </div>
 
-              {/* Our Commitment to Excellence Section */}
+            
               <div className="w-full bg-stone-50/70 dark:bg-[#0c1411]/50 border-t border-stone-200/50 dark:border-stone-850/80 py-16 md:py-24 px-6 md:px-12 transition-colors">
                 <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
-                  {/* Left Side: commitments texts */}
+                
                   <div className="flex-1 flex flex-col gap-8 lg:max-w-[55%]">
                     <div>
                       <span className="text-[10px] font-mono tracking-widest text-[#A35638] dark:text-[#FAF5E9]/80 font-black uppercase">Core Foundation</span>
@@ -3048,7 +3034,7 @@ export default function App({
                     </div>
 
                     <div className="flex flex-col gap-6">
-                      {/* Pillar 1 */}
+                  
                       <div className="flex gap-4 items-start">
                         <div className="p-3 bg-[#FAF5E9] dark:bg-[#182a20] rounded-2xl border border-stone-200/50 dark:border-stone-800 text-[#A35638] dark:text-[#F7E4A1] shrink-0">
                           <Target className="w-5 h-5" />
@@ -3061,7 +3047,7 @@ export default function App({
                         </div>
                       </div>
 
-                      {/* Pillar 2 */}
+            
                       <div className="flex gap-4 items-start">
                         <div className="p-3 bg-[#FAF5E9] dark:bg-[#182a20] rounded-2xl border border-stone-200/50 dark:border-stone-800 text-[#A35638] dark:text-[#F7E4A1] shrink-0">
                           <Users className="w-5 h-5" />
@@ -3074,7 +3060,7 @@ export default function App({
                         </div>
                       </div>
 
-                      {/* Pillar 3 */}
+             
                       <div className="flex gap-4 items-start">
                         <div className="p-3 bg-[#FAF5E9] dark:bg-[#182a20] rounded-2xl border border-stone-200/50 dark:border-stone-800 text-[#A35638] dark:text-[#F7E4A1] shrink-0">
                           <Leaf className="w-5 h-5" />
@@ -3089,7 +3075,7 @@ export default function App({
                     </div>
                   </div>
 
-                  {/* Right Side: Commitment Image with female specialist explaining flow */}
+  
                   <div className="flex-1 w-full lg:max-w-[45%] rounded-3xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-md flex bg-stone-100 dark:bg-[#070c0a]">
                     <img 
                       src="https://images.unsplash.com/photo-1573497149826-0d8502894fc4?auto=format&fit=crop&q=80&w=800" 
@@ -3101,14 +3087,11 @@ export default function App({
                 </div>
               </div>
 
-              {/* ========================================================
-                  CORE TERMINAL OPERATIONS & GROUND SPECS SECTION
-                  (Full-Width, Dark Background, High-Vibrancy Yellow/Gold Text)
-                 ======================================================== */}
+
               <div className="w-full bg-[#111E19] text-[#F7E4A1] border-t border-b border-[#182a20] py-16 md:py-24 px-6 md:px-12 transition-colors">
                 <div className="max-w-6xl mx-auto flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
                   
-                  {/* Left Side: Operations Details (Vibrant Yellow / Gold Theme) */}
+          
                   <div className="flex-1 flex flex-col gap-6 lg:max-w-[55%]">
                     <div className="flex flex-col gap-2">
                       <div className="flex items-center gap-2">
@@ -3125,9 +3108,9 @@ export default function App({
                       </p>
                     </div>
 
-                    {/* Operational Core Pillars */}
+             
                     <div className="flex flex-col gap-5 mt-2">
-                      {/* Operational Point 1 */}
+                   
                       <div className="flex gap-4 items-start bg-[#182a20]/45 p-4 rounded-2xl border border-yellow-500/25">
                         <div className="p-2.5 bg-yellow-450/15 rounded-xl border border-yellow-400/40 text-yellow-300 shrink-0">
                           <CheckCircle2 className="w-5 h-5 text-yellow-400" />
@@ -3142,7 +3125,7 @@ export default function App({
                         </div>
                       </div>
 
-                      {/* Operational Point 2 */}
+                  
                       <div className="flex gap-4 items-start bg-[#182a20]/45 p-4 rounded-2xl border border-yellow-500/25">
                         <div className="p-2.5 bg-yellow-450/15 rounded-xl border border-yellow-400/40 text-yellow-300 shrink-0">
                           <Database className="w-5 h-5 text-yellow-400" />
@@ -3157,7 +3140,7 @@ export default function App({
                         </div>
                       </div>
 
-                      {/* Operational Point 3 */}
+                 
                       <div className="flex gap-4 items-start bg-[#182a20]/45 p-4 rounded-2xl border border-yellow-500/25">
                         <div className="p-2.5 bg-yellow-450/15 rounded-xl border border-yellow-400/40 text-yellow-300 shrink-0">
                           <Users className="w-5 h-5 text-yellow-400" />
@@ -3174,7 +3157,7 @@ export default function App({
                     </div>
                   </div>
 
-                  {/* Right Side: Crew Inspection Image (Two Workers in Stack Terminal) */}
+            
                   <div className="flex-1 w-full lg:max-w-[45%] rounded-3xl overflow-hidden border-2 border-yellow-400/40 shadow-2xl relative flex bg-[#162720]">
                     <img 
                       src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=800" 
@@ -3183,7 +3166,7 @@ export default function App({
                       referrerPolicy="no-referrer"
                     />
                     
-                    {/* Floating live indicator status card */}
+  
                     <div className="absolute bottom-4 left-4 bg-[#111E19]/90 border border-yellow-400/35 backdrop-blur-md p-3 rounded-2xl flex items-center gap-2.5 shadow-lg">
                       <span className="relative flex h-2.5 w-2.5 shrink-0">
                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
@@ -3202,9 +3185,7 @@ export default function App({
             </div>
           )}
 
-          {/* ====================================
-              2. ABOUT US SECTION
-              ==================================== */}
+
           {activeTab === "about" && (
             <section id="about" className="py-20 md:py-24 px-6 max-w-7xl mx-auto flex flex-col gap-16 scroll-mt-14">
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -3254,9 +3235,7 @@ export default function App({
             </section>
           )}
 
-          {/* ====================================
-              3. OUR SERVICES SECTION
-              ==================================== */}
+
           {activeTab === "services" && (
             <section id="services" className="py-20 bg-white border-y border-stone-200/50 px-6 scroll-mt-14">
               <div className="max-w-7xl mx-auto flex flex-col gap-12">
@@ -3270,7 +3249,7 @@ export default function App({
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   
-                  {/* Air freight */}
+              
                   <div className="bg-[#FAF5E9]/55 border border-stone-200/60 rounded-3xl p-6 flex flex-col justify-between gap-6 hover:shadow-md transition-shadow">
                     <div className="flex flex-col gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-white text-[#A35638] flex items-center justify-center shadow-2xs border">
@@ -3286,7 +3265,7 @@ export default function App({
                     <span className="text-[9px] font-mono tracking-widest text-[#A35638] font-bold">Priority Global Transit</span>
                   </div>
 
-                  {/* Ocean freight */}
+              
                   <div className="bg-[#FAF5E9]/55 border border-stone-200/60 rounded-3xl p-6 flex flex-col justify-between gap-6 hover:shadow-md transition-shadow">
                     <div className="flex flex-col gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-white text-[#A35638] flex items-center justify-center shadow-2xs border">
@@ -3302,7 +3281,7 @@ export default function App({
                     <span className="text-[9px] font-mono tracking-widest text-[#A35638] font-bold">International Port Gates</span>
                   </div>
 
-                  {/* Land cargo */}
+           
                   <div className="bg-[#FAF5E9]/55 border border-stone-200/60 rounded-3xl p-6 flex flex-col justify-between gap-6 hover:shadow-md transition-shadow">
                     <div className="flex flex-col gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-white text-[#A35638] flex items-center justify-center shadow-2xs border">
@@ -3318,7 +3297,7 @@ export default function App({
                     <span className="text-[9px] font-mono tracking-widest text-[#A35638] font-bold">In-Transit Trucking Grid</span>
                   </div>
 
-                  {/* Secure storage */}
+              
                   <div className="bg-[#FAF5E9]/55 border border-stone-200/60 rounded-3xl p-6 flex flex-col justify-between gap-6 hover:shadow-md transition-shadow">
                     <div className="flex flex-col gap-4">
                       <div className="w-12 h-12 rounded-2xl bg-white text-[#A35638] flex items-center justify-center shadow-2xs border">
@@ -3339,9 +3318,8 @@ export default function App({
             </section>
           )}
 
-          {/* ====================================
-              4. PUBLIC TRACK & TRACE TAB VIEW
-             ==================================== */}
+
+
           {activeTab === "track" && (
             <section id="track" className="py-20 px-6 max-w-4xl mx-auto scroll-mt-14">
               <div className="bg-white border border-stone-200/60 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-7">
@@ -3356,7 +3334,6 @@ export default function App({
                   </p>
                 </div>
 
-                {/* Input Search Form */}
                 <form onSubmit={(e) => handlePublicTrackSearch(e)} className="flex gap-2 p-1 border border-stone-200 bg-stone-50/50 rounded-2xl font-sans text-xs">
                   <input
                     type="text"
@@ -3380,11 +3357,11 @@ export default function App({
                   </div>
                 )}
 
-                {/* Found Shipment Waybill card */}
+           
                 {publicFoundShipment && (
                   <div className="border border-stone-200 rounded-3xl p-5 md:p-6 flex flex-col gap-6 font-sans">
                     
-                    {/* Header Details */}
+              
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pb-4 border-b border-stone-100 gap-3">
                       <div>
                         <p className="text-[10px] text-stone-400 font-bold uppercase tracking-wider">Waybill Record ID</p>
@@ -3404,7 +3381,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* Left/Right details grid */}
+                
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pb-6 border-b border-stone-100 text-xs">
                       <div className="flex flex-col gap-3">
                         <h4 className="font-extrabold text-[#111E19]">Recipient & Cargo Sizing</h4>
@@ -3445,7 +3422,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* INTERACTIVE TRANSIT ROUTE MAP */}
+       
                     <TrackingMockMap 
                       status={publicFoundShipment.status} 
                       origin={publicFoundShipment.origin}
@@ -3457,7 +3434,7 @@ export default function App({
                       hoursDriven={publicFoundShipment.hoursDriven}
                     />
 
-                    {/* ACTIVE TRACKING CHRONOLOGICAL MILESTONE TIMELINE */}
+                  
                     <div className="flex flex-col gap-4">
                       <h4 className="font-black text-[#111E19] uppercase text-xs tracking-wider">
                         Operational Path Milestones
@@ -3469,7 +3446,7 @@ export default function App({
                           return (
                             <div key={i} className="relative flex flex-col gap-1 text-xs">
                               
-                              {/* Dot circle map */}
+                          
                               <span className={`absolute -left-[22px] top-1.5 w-3.5 h-3.5 rounded-full border-2 bg-white flex items-center justify-center ${
                                 isActive ? "border-[#A35638] scale-110 before:w-1.5 before:h-1.5 before:bg-[#A35638] before:rounded-full" : "border-stone-400"
                               }`} />
@@ -3487,7 +3464,7 @@ export default function App({
                       </div>
                     </div>
 
-                    {/* AI COGNITIVE REPORT */}
+
                     <div className="bg-[#FAF4E8] rounded-2xl border border-stone-250 p-4 flex flex-col gap-2.5">
                       <h5 className="text-[10px] uppercase font-mono tracking-wider font-extrabold text-[#A35638] flex items-center gap-1.5">
                         <Zap className="w-3.5 h-3.5 text-[#A35638]" />
@@ -3505,9 +3482,7 @@ export default function App({
             </section>
           )}
 
-          {/* ====================================
-              5. CONTACT / FREE QUOTE COMPONENT
-              ==================================== */}
+
           {activeTab === "contact" && (
             <section id="contact" className="py-20 md:py-24 px-6 max-w-4xl mx-auto scroll-mt-14">
               <div className="bg-white border border-stone-200/60 rounded-3xl p-6 md:p-8 shadow-sm flex flex-col gap-6">
@@ -3587,9 +3562,7 @@ export default function App({
         </div>
       )}
 
-      {/* =========================================================
-          GLOBAL CORPORATE FOOTER
-         ========================================================= */}
+
       <footer className="w-full bg-[#111E19] text-white pt-16 pb-8 px-6 border-t border-stone-900 mt-auto font-sans">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-8 pb-10 border-b border-stone-800">
           
@@ -3654,15 +3627,13 @@ export default function App({
         </div>
       </footer>
 
-      {/* =========================================================
-          FLOATING CHAT ASSISTANT WIDGET
-         ========================================================= */}
+
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3 font-sans">
         
         {chatOpen && (
           <div className="w-80 h-96 bg-white border border-stone-200/80 rounded-3xl shadow-2xl flex flex-col overflow-hidden animate-fadeIn">
             
-            {/* Widget header */}
+          
             <div className="bg-[#111E19] text-white p-4 flex justify-between items-center shrink-0">
               <div className="flex items-center gap-2">
                 <div className="bg-white/10 p-1.5 rounded-lg text-[#F7E4A1]">
@@ -3678,7 +3649,7 @@ export default function App({
               </button>
             </div>
 
-            {/* Widget messages history */}
+          
             <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 text-xs bg-[#FAF5E9]/35">
               {chatHistory.map((item, index) => (
                 <div
@@ -3694,7 +3665,7 @@ export default function App({
               ))}
             </div>
 
-            {/* Widget output form */}
+        
             <form onSubmit={handleSendChatMessage} className="p-2.5 border-t border-stone-100 flex gap-2 shrink-0 bg-white">
               <input
                 type="text"
@@ -3714,7 +3685,7 @@ export default function App({
           </div>
         )}
 
-        {/* Big circular button activator */}
+      
         <button
           onClick={() => setChatOpen(!chatOpen)}
           className="w-14 h-14 rounded-full bg-[#111E19] text-[#F7E4A1] flex items-center justify-center shadow-lg hover:scale-105 active:scale-95 transition-transform"
@@ -3725,7 +3696,7 @@ export default function App({
 
       </div>
 
-      {/* Shipment Deletion Confirmation Modal */}
+
       {shipmentToDelete && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4 transition-all">
           <div className="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl border border-stone-200/80 flex flex-col gap-5 animate-in fade-in zoom-in-95 duration-200">
@@ -3787,12 +3758,12 @@ export default function App({
         </div>
       )}
 
-      {/* 🛠️ EDIT/UPDATE SHIPMENT OVERRIDE MODAL */}
+
       {editingShipment && (
         <div className="fixed inset-0 z-[999] bg-stone-900/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto selection:bg-[#F7E4A1]">
           <div className="bg-white border-2 border-[#111E19] md:rounded-3xl rounded-2xl w-full max-w-2xl p-5 md:p-8 flex flex-col gap-6 shadow-2xl animate-scaleIn my-8 max-h-[90vh] overflow-y-auto">
             
-            {/* Modal Header */}
+   
             <div className="flex items-center justify-between pb-4 border-b border-stone-200">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-800 flex items-center justify-center border border-sky-150 shrink-0">
@@ -3816,7 +3787,7 @@ export default function App({
               </button>
             </div>
 
-            {/* Editing Form */}
+      
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-sans text-[#111E19]">
               
               <div className="col-span-2">
@@ -3855,7 +3826,7 @@ export default function App({
                 />
               </div>
 
-              {/* Package Weight numerical & unit inputs */}
+       
               <div>
                 <label className="block text-[10px] font-sans font-black uppercase text-stone-500 mb-1">
                   Package Weight
@@ -3870,7 +3841,7 @@ export default function App({
                     onChange={(e) => setEditingShipment({ 
                       ...editingShipment, 
                       packageWeight: parseFloat(e.target.value) || 0,
-                      weight: e.target.value // support backward compat in listing
+                      weight: e.target.value 
                     })}
                   />
                   <select
@@ -3884,7 +3855,7 @@ export default function App({
                 </div>
               </div>
 
-              {/* Payment Method dropdown input */}
+   
               <div>
                 <label className="block text-[10px] font-sans font-black uppercase text-stone-500 mb-1">
                   Payment Method
@@ -3915,7 +3886,7 @@ export default function App({
                 />
               </div>
 
-              {/* Fragile Switch */}
+        
               <div className="flex flex-col justify-center">
                 <span className="block text-[10px] font-sans font-black uppercase text-stone-500 mb-1">
                   Fragile Classification
@@ -3931,7 +3902,7 @@ export default function App({
                 </label>
               </div>
 
-              {/* Operational Milestone (Status) Selector */}
+        
               <div>
                 <label className="block text-[10px] font-sans font-black uppercase text-stone-500 mb-1">
                   Active Status Milestone
@@ -3949,7 +3920,7 @@ export default function App({
                 </select>
               </div>
 
-              {/* Transit Distance Covered & Hours Driven */}
+          
               <div className="grid grid-cols-2 gap-2 border border-dashed border-stone-250 rounded-xl p-2.5 bg-stone-50 col-span-2">
                 <div className="col-span-2 flex items-center gap-1.5">
                   <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -3985,7 +3956,7 @@ export default function App({
 
             </div>
 
-            {/* Modal Actions */}
+           
             <div className="grid grid-cols-2 gap-3 pb-2 pt-2 border-t border-stone-150">
               <button
                 type="button"
@@ -4016,13 +3987,13 @@ export default function App({
                     const resData = await response.json();
                     const updated = resData.shipment;
 
-                    // Sync state immediately in local state
+               
                     setServerShipments(prev => {
                       const filtered = prev.filter(s => s.orderId !== updated.orderId);
                       return [updated, ...filtered];
                     });
 
-                    // Update currently selected active/displayed trackers if it matches
+        
                     if (activeWaybill && activeWaybill.orderId === updated.orderId) {
                       setActiveWaybill(updated);
                     }
@@ -4030,7 +4001,7 @@ export default function App({
                       setLastCreatedDomesticWaybill(updated);
                     }
 
-                    // Reset values & close modal
+          
                     setEditingShipment(null);
                   } catch (err: any) {
                     console.error(err);

@@ -430,6 +430,9 @@
       max-width: 96rem;
     }
   }
+  .mx-2 {
+    margin-inline: calc(var(--spacing) * 2);
+  }
   .mx-auto {
     margin-inline: auto;
   }
@@ -1295,6 +1298,9 @@
   }
   .bg-\[\#10B981\] {
     background-color: #10B981;
+  }
+  .bg-\[\#25D366\] {
+    background-color: #25D366;
   }
   .bg-\[\#25D366\]\/10 {
     background-color: color-mix(in oklab, #25D366 10%, transparent);

@@ -1,6 +1,39 @@
+import { Pool } from "pg";
+
+const pool = new Pool({
+  connectionString: process.env.SUPABASE_URL,
+  ssl: { rejectUnauthorized: false },
+});
+
+
+export default pool;
+
 export interface ShipmentItem {
   name: string;
   qty: string;
+}
+
+export interface Shipment {
+  orderId: string;
+  customerName: string;
+  destination: string;
+  weight: string;
+  dimensions: string;
+  fragile: boolean;
+  items: ShipmentItem[];
+  status: string;
+  history: HistoryItem[];
+  insights?: ShipmentInsights;
+  origin?: string;
+  // ADD THESE TWO LINES:
+  originCoords?: { lat: number; lng: number } | null;
+  destCoords?: { lat: number; lng: number } | null;
+  transitCheckpoint?: string;
+  distanceCovered?: number;
+  hoursDriven?: number;
+  packageWeight?: number;
+  weightUnit?: "kg" | "lbs";
+  paymentMethod?: string;
 }
 
 export interface HistoryItem {
@@ -18,94 +51,130 @@ export interface ShipmentInsights {
   buyerDispatchScript: string;
 }
 
-export interface Shipment {
-  orderId: string;
-  customerName: string;
-  destination: string;
-  weight: string;
-  dimensions: string;
-  fragile: boolean;
-  items: ShipmentItem[];
-  status: string;
-  history: HistoryItem[];
-  insights?: ShipmentInsights;
-  origin?: string;
-  transitCheckpoint?: string;
-  distanceCovered?: number;
-  hoursDriven?: number;
-  packageWeight?: number;
-  weightUnit?: 'kg' | 'lbs';
-  paymentMethod?: string;
+// export interface Shipment {
+//   orderId: string;
+//   customerName: string;
+//   destination: string;
+//   weight: string;
+//   dimensions: string;
+//   fragile: boolean;
+//   items: ShipmentItem[];
+//   status: string;
+//   history: HistoryItem[];
+//   insights?: ShipmentInsights;
+//   origin?: string;
+//   transitCheckpoint?: string;
+//   distanceCovered?: number;
+//   hoursDriven?: number;
+//   packageWeight?: number;
+//   weightUnit?: "kg" | "lbs";
+//   paymentMethod?: string;
+// }
+
+export async function getAllShipments(): Promise<Shipment[]> {
+  const { rows } = await pool.query(
+    "SELECT data FROM shipments ORDER BY updated_at DESC"
+  );
+  return rows.map((r) => r.data as Shipment);
 }
 
-export let COURIER_SHIPMENTS: Record<string, Shipment> = {
-  "CR-385901-LT": {
-    orderId: "CR-385901-LT",
-    customerName: "Amara Diallo",
-    destination: "Avenue President Kennedy, Yaoundé, Cameroon",
-    weight: "480",
-    dimensions: "120x80x100 cm",
-    fragile: true,
-    items: [
-      { name: "Commercial Solar Battery Inverter Packs", qty: "10" },
-      { name: "Heavy Duty Frame Rails", qty: "4" }
-    ],
-    status: "GATEWAY_CUSTOMS_HOLD",
-    history: [
-      { status: "MANIFEST_CREATED", location: "Crest Packaging Hub", description: "Cargo manifest established and verified by authorized port masters.", date: "2026-05-21 08:30 UTC" },
-      { status: "DRY_BULK_SORTED", location: "Crest Packaging Hub", description: "Heavy-duty custom double-cell bubble alignment wrapping applied.", date: "2026-05-21 14:15 UTC" },
-      { status: "IN_OVERLAND_TRANSIT", location: "Douala Dry Port Gateway", description: "Dispatched on Crest Heavy Freight vehicle Node 4.", date: "2026-05-22 03:00 UTC" },
-      { status: "GATEWAY_CUSTOMS_HOLD", location: "Yaoundé Ingress Checkpoint", description: "Bilateral custom verification protocol initiated. Processing seals.", date: "2026-05-22 14:50 UTC" }
-    ],
-    insights: {
-      suggestedCarrier: "Crest Regional Overland Freight (West Africa Fleet)",
-      predictedTransitDays: "5 Days",
-      riskAssessment: "MEDIUM",
-      directives: [
-        "Lithium hazmat placards verified and secured on side vectors.",
-        "Double-layer anti-impact corner pads verified and locked.",
-        "Maintain hold temperatures below 25°C in thermo-protective deck."
-      ],
-      buyerDispatchScript: `[Crest Logistics] Dispatch Notification\nAttention: Amara Diallo\nManifest Waybill: CR-385901-LT\nStatus: GATEWAY_CUSTOMS_HOLD at Yaoundé Ingress Checkpoint.\nOptimized routing has been implemented by our AI Dispatch planners.`
-    }
-  },
-  "CR-992104-LT": {
-    orderId: "CR-992104-LT",
-    customerName: "Mariam Sylla",
-    destination: "Cocody Boulevard, Abidjan, Ivory Coast",
-    weight: "35",
-    dimensions: "60x40x50 cm",
-    fragile: false,
-    items: [
-      { name: "Professional Deep-Well Food Mixer", qty: "1" },
-      { name: "Stainless Steel Stockpots", qty: "2" }
-    ],
-    status: "DELIVERED",
-    history: [
-      { status: "MANIFEST_CREATED", location: "Crest Packaging Hub", description: "Order verified.", date: "2026-05-20 09:00 UTC" },
-      { status: "DRY_BULK_SORTED", location: "Crest Packaging Hub", description: "Standard cargo wrapping applied.", date: "2026-05-20 11:30 UTC" },
-      { status: "IN_OVERLAND_TRANSIT", location: "Abidjan Marine Hub", description: "In-state express courier dispatched.", date: "2026-05-21 13:40 UTC" },
-      { status: "DELIVERED", location: "Cocody Blvd Destination", description: "Cargo signee hand-off completed cleanly. Final manifest registry archived.", date: "2026-05-22 11:15 UTC" }
-    ],
-    insights: {
-      suggestedCarrier: "Crest Express Courier Group",
-      predictedTransitDays: "2 Days",
-      riskAssessment: "LOW",
-      directives: [
-        "Store in default well-ventilated ambient climate warehouses.",
-        "Ensure standard heavy-duty wrapping of industrial cargo pallet boards."
-      ],
-      buyerDispatchScript: `[Crest Logistics] Manifest Dispatch System\nAttention: Mariam Sylla\nShipment Sign-off Complete. Waybill CR-992104-LT has been legally delivered.`
-    }
-  }
-};
+export async function getShipmentById(orderId: string): Promise<Shipment | null> {
+  const { rows } = await pool.query(
+    "SELECT data FROM shipments WHERE order_id = $1",
+    [orderId.toUpperCase()]
+  );
+  return rows.length > 0 ? (rows[0].data as Shipment) : null;
+}
 
+export async function upsertShipment(shipment: Shipment): Promise<Shipment> {
+  const id = shipment.orderId.trim().toUpperCase();
+  const { rows } = await pool.query(
+    `INSERT INTO shipments (order_id, data, updated_at)
+     VALUES ($1, $2, NOW())
+     ON CONFLICT (order_id)
+     DO UPDATE SET data = $2, updated_at = NOW()
+     RETURNING data`,
+    [id, JSON.stringify({ ...shipment, orderId: id })]
+  );
+  return rows[0].data as Shipment;
+}
 
-if (process.env.NODE_ENV !== "production") {
-  const g = global as any;
-  if (!g.COURIER_SHIPMENTS) {
-    g.COURIER_SHIPMENTS = COURIER_SHIPMENTS;
-  } else {
-    COURIER_SHIPMENTS = g.COURIER_SHIPMENTS;
+export async function deleteShipment(orderId: string): Promise<boolean> {
+  const { rowCount } = await pool.query(
+    "DELETE FROM shipments WHERE order_id = $1",
+    [orderId.toUpperCase()]
+  );
+  return (rowCount ?? 0) > 0;
+}
+
+export async function seedIfEmpty(): Promise<void> {
+  try {
+    const { rows } = await pool.query("SELECT COUNT(*) FROM shipments");
+    const count = parseInt(rows[0].count, 10);
+    if (count === 0) {
+      console.log("Crest DB: Seeding sample shipments...");
+      await upsertShipment({
+        orderId: "CR-385901-LT",
+        customerName: "Amara Diallo",
+        destination: "Avenue President Kennedy, Yaoundé, Cameroon",
+        weight: "480",
+        dimensions: "120x80x100 cm",
+        fragile: true,
+        items: [
+          { name: "Commercial Solar Battery Inverter Packs", qty: "10" },
+          { name: "Heavy Duty Frame Rails", qty: "4" },
+        ],
+        status: "GATEWAY_CUSTOMS_HOLD",
+        history: [
+          { status: "MANIFEST_CREATED", location: "Crest Packaging Hub", description: "Cargo manifest established and verified by authorized port masters.", date: "2026-05-21 08:30 UTC" },
+          { status: "DRY_BULK_SORTED", location: "Crest Packaging Hub", description: "Heavy-duty custom double-cell bubble alignment wrapping applied.", date: "2026-05-21 14:15 UTC" },
+          { status: "IN_OVERLAND_TRANSIT", location: "Douala Dry Port Gateway", description: "Dispatched on Crest Heavy Freight vehicle Node 4.", date: "2026-05-22 03:00 UTC" },
+          { status: "GATEWAY_CUSTOMS_HOLD", location: "Yaoundé Ingress Checkpoint", description: "Bilateral custom verification protocol initiated. Processing seals.", date: "2026-05-22 14:50 UTC" },
+        ],
+        insights: {
+          suggestedCarrier: "Crest Regional Overland Freight (West Africa Fleet)",
+          predictedTransitDays: "5 Days",
+          riskAssessment: "MEDIUM",
+          directives: [
+            "Lithium hazmat placards verified and secured on side vectors.",
+            "Double-layer anti-impact corner pads verified and locked.",
+            "Maintain hold temperatures below 25°C in thermo-protective deck.",
+          ],
+          buyerDispatchScript: "[Crest Logistics] Dispatch Notification\nAttention: Amara Diallo\nManifest Waybill: CR-385901-LT\nStatus: GATEWAY_CUSTOMS_HOLD at Yaoundé Ingress Checkpoint.\nOptimized routing has been implemented by our AI Dispatch planners.",
+        },
+      });
+      await upsertShipment({
+        orderId: "CR-992104-LT",
+        customerName: "Mariam Sylla",
+        destination: "Cocody Boulevard, Abidjan, Ivory Coast",
+        weight: "35",
+        dimensions: "60x40x50 cm",
+        fragile: false,
+        items: [
+          { name: "Professional Deep-Well Food Mixer", qty: "1" },
+          { name: "Stainless Steel Stockpots", qty: "2" },
+        ],
+        status: "DELIVERED",
+        history: [
+          { status: "MANIFEST_CREATED", location: "Crest Packaging Hub", description: "Order verified.", date: "2026-05-20 09:00 UTC" },
+          { status: "DRY_BULK_SORTED", location: "Crest Packaging Hub", description: "Standard cargo wrapping applied.", date: "2026-05-20 11:30 UTC" },
+          { status: "IN_OVERLAND_TRANSIT", location: "Abidjan Marine Hub", description: "In-state express courier dispatched.", date: "2026-05-21 13:40 UTC" },
+          { status: "DELIVERED", location: "Cocody Blvd Destination", description: "Cargo signee hand-off completed cleanly. Final manifest registry archived.", date: "2026-05-22 11:15 UTC" },
+        ],
+        insights: {
+          suggestedCarrier: "Crest Express Courier Group",
+          predictedTransitDays: "2 Days",
+          riskAssessment: "LOW",
+          directives: [
+            "Store in default well-ventilated ambient climate warehouses.",
+            "Ensure standard heavy-duty wrapping of industrial cargo pallet boards.",
+          ],
+          buyerDispatchScript: "[Crest Logistics] Manifest Dispatch System\nAttention: Mariam Sylla\nShipment Sign-off Complete. Waybill CR-992104-LT has been legally delivered.",
+        },
+      });
+      console.log("Crest DB: Seeded 2 sample shipments successfully.");
+    }
+  } catch (err) {
+    console.error("Crest DB: Seed error", err);
   }
 }

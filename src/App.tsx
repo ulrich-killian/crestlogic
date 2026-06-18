@@ -416,6 +416,9 @@ export default function App({
               JSON.stringify(publicFoundShipment.history)
           ) {
             setPublicFoundShipment(data);
+            console.log('📦 Shipment data received:', data);
+console.log('originCoords:', data.originCoords);
+console.log('destCoords:', data.destCoords);
           }
         }
       } catch (e) {
@@ -463,24 +466,32 @@ export default function App({
     }
   };
 
-  const handleAdminLogin = (e: React.FormEvent) => {
+  const handleAdminLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (adminUsername.trim() === "admin" && adminPassword === "admin2026") {
-      if (typeof document !== "undefined") {
-        document.cookie =
-          "admin_token=authenticated_operator; path=/; max-age=86400";
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username: adminUsername,
+          password: adminPassword,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setIsAdminLoggedIn(true);
+        setAuthError(null);
+        setAdminPassword("");
+        fetchShipmentsDb();
+        if (onLoginSuccess) onLoginSuccess();
+      } else {
+        setAuthError(
+          data.error ||
+            "Authorized Personnel Only: Incorrect Operator credentials."
+        );
       }
-      setIsAdminLoggedIn(true);
-      setAuthError(null);
-      setAdminPassword("");
-      fetchShipmentsDb();
-      if (onLoginSuccess) {
-        onLoginSuccess();
-      }
-    } else {
-      setAuthError(
-        "Authorized Personnel Only: Incorrect Operator credentials."
-      );
+    } catch (err) {
+      setAuthError("Connection error. Please try again.");
     }
   };
 
@@ -1092,11 +1103,13 @@ export default function App({
     } catch {
       setChatHistory((prev) => [
         ...prev.slice(0, -1),
-        { sender: "bot", text: "Sorry, I'm having trouble connecting. Please try again." },
+        {
+          sender: "bot",
+          text: "Sorry, I'm having trouble connecting. Please try again.",
+        },
       ]);
     }
   };
-    
 
   const handleContactSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -4418,20 +4431,22 @@ export default function App({
                           Current Milestone
                         </span>
                         <span
-                          className={`px-3 py-1 bg-amber-50 rounded-full text-xs font-black uppercase inline-block text-center mt-1 border ${
-                            publicFoundShipment.status === "MANIFEST_CREATED"
+                          className={`px-3 py-1 rounded-full text-xs font-black uppercase inline-block text-center mt-1 border ${
+                            publicFoundShipment?.status === "MANIFEST_CREATED"
                               ? "bg-stone-100 border-stone-200 text-stone-600"
-                              : publicFoundShipment.status === "DRY_BULK_SORTED"
+                              : publicFoundShipment?.status ===
+                                "DRY_BULK_SORTED"
                               ? "bg-amber-50 border-amber-250 text-amber-800"
-                              : publicFoundShipment.status ===
+                              : publicFoundShipment?.status ===
                                 "GATEWAY_CUSTOMS_HOLD"
                               ? "text-rose-800 bg-rose-50 border-rose-200"
-                              : publicFoundShipment.status === "DELIVERED"
+                              : publicFoundShipment?.status === "DELIVERED"
                               ? "text-emerald-800 bg-emerald-50 border-emerald-250"
                               : "bg-sky-50 border-sky-200 text-sky-800"
                           }`}
                         >
-                          {publicFoundShipment.status.replace(/_/g, " ")}
+                          {publicFoundShipment?.status?.replace(/_/g, " ") ||
+                            "PENDING"}
                         </span>
                       </div>
                     </div>
@@ -4506,17 +4521,17 @@ export default function App({
                     </div>
 
                     <TrackingMockMap
-                      status={publicFoundShipment.status}
-                      origin={publicFoundShipment.origin}
-                      destination={publicFoundShipment.destination}
-                      transitCheckpoint={publicFoundShipment.transitCheckpoint}
-                      carrierName={
-                        publicFoundShipment.insights?.suggestedCarrier
-                      }
-                      orderId={publicFoundShipment.orderId}
-                      distanceCovered={publicFoundShipment.distanceCovered}
-                      hoursDriven={publicFoundShipment.hoursDriven}
-                    />
+  status={publicFoundShipment.status}
+  origin={publicFoundShipment.origin}
+  destination={publicFoundShipment.destination}
+  originCoords={publicFoundShipment.originCoords}    // ← ADD THIS
+  destCoords={publicFoundShipment.destCoords}        // ← ADD THIS
+  transitCheckpoint={publicFoundShipment.transitCheckpoint}
+  carrierName={publicFoundShipment.insights?.suggestedCarrier}
+  orderId={publicFoundShipment.orderId}
+  distanceCovered={publicFoundShipment.distanceCovered}
+  hoursDriven={publicFoundShipment.hoursDriven}
+/>
 
                     <div className="flex flex-col gap-4">
                       <h4 className="font-black text-[#111E19] uppercase text-xs tracking-wider">
@@ -5101,7 +5116,7 @@ export default function App({
                     setEditingShipment({
                       ...editingShipment,
                       paymentMethod: e.target.value,
-                    }) 
+                    })
                   }
                 >
                   <option value="Apple Pay">Apple Pay</option>

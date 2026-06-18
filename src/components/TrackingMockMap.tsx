@@ -144,8 +144,8 @@ function hashStringToCoordinates(str: string): { lat: number; lng: number } {
     hash2 = (hash2 << 7) - hash2 + char * 3;
     hash2 |= 0;
   }
-  const lat = (Math.abs(hash1) % 90) - 20; // safe globally scaled lat
-  const lng = (Math.abs(hash2) % 240) - 100; // safe globally scaled lng
+  const lat = (Math.abs(hash1) % 90) - 20; 
+  const lng = (Math.abs(hash2) % 240) - 100; 
   return { lat, lng };
 }
 
@@ -153,12 +153,12 @@ function getLatLng(address: string, defaultVal: { lat: number; lng: number }): {
   if (!address) return defaultVal;
   const normalized = address.toLowerCase();
   
-  // Sort keys from longest to shortest to prevent partial matches
+
   const sortedKeys = Object.keys(GEO_DICTIONARY).sort((a, b) => b.length - a.length);
 
   for (const key of sortedKeys) {
     const coords = GEO_DICTIONARY[key];
-    // Escape string for regex use
+
     const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     const regex = new RegExp(`\\b${escapedKey}\\b`, 'i');
     if (regex.test(normalized)) {
@@ -197,6 +197,8 @@ const WEATHER_DATA: Record<string, { condition: string; temp: string; icon: Reac
 interface TrackingMockMapProps {
   status: string;
   origin?: string;
+  originCoords?: { lat: number; lng: number } | null;  
+  destCoords?: { lat: number; lng: number } | null;    
   destination: string;
   transitCheckpoint?: string;
   carrierName?: string;
@@ -272,7 +274,9 @@ export default function TrackingMockMap({
   carrierName = "Crest Regional Overland Fleet",
   orderId,
   distanceCovered,
-  hoursDriven
+  hoursDriven,
+  originCoords,  // ← NEW
+  destCoords     // ← NEW
 }: TrackingMockMapProps) {
   const [isExpanded, setIsExpanded] = useState(false);
   
@@ -285,9 +289,19 @@ export default function TrackingMockMap({
   const defaultOrigin = { lat: 4.0511, lng: 9.7679 }; // Douala
   const defaultDest = { lat: 3.8480, lng: 11.5021 };  // Yaounde
 
-  const start = useMemo(() => getLatLng(origin, defaultOrigin), [origin]);
-  const end = useMemo(() => getLatLng(destination, defaultDest), [destination]);
-
+  const start = useMemo(() => {
+    if (originCoords?.lat && originCoords?.lng) {
+      return originCoords;
+    }
+    return getLatLng(origin, defaultOrigin);
+  }, [origin, originCoords]);
+  
+  const end = useMemo(() => {
+    if (destCoords?.lat && destCoords?.lng) {
+      return destCoords;
+    }
+    return getLatLng(destination, defaultDest);
+  }, [destination, destCoords]);
   const totalDistance = useMemo(() => {
     return Math.round(getGeodesicDistance(start, end));
   }, [start, end]);
@@ -737,7 +751,7 @@ export default function TrackingMockMap({
             {origin.split(",")[0] || "Crest Packaging Hub"}
           </p>
           <span className="text-[10px] text-stone-500 dark:text-stone-400 font-sans leading-none mt-0.5 block truncate" title={origin}>
-            {origin.split(",").slice(1).join(",") || "Douala Dry Port Gateway, CM"}
+            {origin.split(",").slice(1).join(",") || "United state"}
           </span>
         </div>
 

@@ -1,7 +1,7 @@
 {
+  "/api/shipments/[id]/route": "app/api/shipments/[id]/route.js",
   "/api/geocode/route": "app/api/geocode/route.js",
   "/api/register-shipment/route": "app/api/register-shipment/route.js",
-  "/api/shipments/[id]/route": "app/api/shipments/[id]/route.js",
   "/admin/dashboard/page": "app/admin/dashboard/page.js",
   "/(public)/page": "app/(public)/page.js"
 }

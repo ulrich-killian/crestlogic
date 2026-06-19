@@ -133,6 +133,7 @@ describe('Crest Logistics Backend Tests', () => {
   // TEST 2: Shipment Registration with Geocoding
   // ============================================
   describe('Shipment Registration with Geocoding', () => {
+    let createdOrderId: string | undefined;
     const testShipment = {
       orderId: `TEST-${Date.now()}`,
       customerName: 'Test Customer',
@@ -157,8 +158,8 @@ describe('Crest Logistics Backend Tests', () => {
     };
 
     test('should register shipment with geocoded coordinates', async () => {
-      const response = await apiFetch(
-        '/api/register-shipment',
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -182,7 +183,16 @@ describe('Crest Logistics Backend Tests', () => {
       expect(data.shipment).toBeDefined();
       expect(data.shipment.originCoords).toBeDefined();
       expect(data.shipment.destCoords).toBeDefined();
-      console.log(' Shipment created with coordinates:', data.shipment.originCoords, data.shipment.destCoords);
+      createdOrderId = data.shipment.orderId;
+      console.log('✅ Shipment created with coordinates:', data.shipment.originCoords, data.shipment.destCoords);
+    });
+
+    afterAll(async () => {
+      if (createdOrderId) {
+        await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${createdOrderId}`, {
+          method: 'DELETE'
+        });
+      }
     });
   });
 

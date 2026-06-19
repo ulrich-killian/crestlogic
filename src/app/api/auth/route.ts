@@ -1,12 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { SignJWT } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "crest_logistics_super_secret_2026"
-);
+const jwtSecretRaw = process.env.JWT_SECRET;
+if (!jwtSecretRaw) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+const JWT_SECRET = new TextEncoder().encode(jwtSecretRaw);
 
-const ADMIN_USERNAME = process.env.ADMIN_USERNAME || "admin";
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin2026";
+const ADMIN_USERNAME = process.env.ADMIN_USERNAME;
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_USERNAME || !ADMIN_PASSWORD) {
+  throw new Error("ADMIN_USERNAME and ADMIN_PASSWORD environment variables are required");
+}
 
 export async function POST(req: NextRequest) {
   try {

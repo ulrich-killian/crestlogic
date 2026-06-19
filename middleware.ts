@@ -2,9 +2,11 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const JWT_SECRET = new TextEncoder().encode(
-  process.env.JWT_SECRET || "crest_logistics_super_secret_2026"
-);
+const jwtSecretRaw = process.env.JWT_SECRET;
+if (!jwtSecretRaw) {
+  throw new Error("JWT_SECRET environment variable is required");
+}
+const JWT_SECRET = new TextEncoder().encode(jwtSecretRaw);
 
 export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin/dashboard")) {

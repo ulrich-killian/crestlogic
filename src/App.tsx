@@ -922,18 +922,18 @@ console.log('destCoords:', data.destCoords);
         ? `[Crest Tracking Link] Tap to view your delivery map: ${window.location.origin}/?track=${lastCreatedDomesticWaybill.orderId}`
         : domesticMessageDraft;
 
-      setSimulatedNotifications((prev) => [
-        {
-          type: dispatchChannel === "phone" ? "sms" : dispatchChannel,
-          title: isLinkOnly
-            ? "Direct Shipment Link"
-            : "Automated Waybill Dispatch",
-          text: finalMessage,
-          sender: "Crest Admin Operations",
-          time: new Date().toLocaleTimeString(),
-        },
-        ...prev,
-      ]);
+        setSimulatedNotifications((prev) => [
+          {
+            type: dispatchChannel,
+            title: isLinkOnly
+              ? "Direct Shipment Link"
+              : "Automated Waybill Dispatch",
+            text: finalMessage,
+            sender: "Crest Admin Operations",
+            time: new Date().toLocaleTimeString(),
+          },
+          ...prev,
+        ]);
 
       setDispatchStatusMsg(
         `Success! Automated message was queued and transmitted via ${modeText} to: ${dispatchContactTarget}`

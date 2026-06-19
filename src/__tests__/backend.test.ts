@@ -3,6 +3,19 @@
  * Tests all critical backend functionality before deployment
  */
 
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000';
+
+// Shared helper function to cleanly handle request timeouts across the test suite
+async function apiFetch(path: string, init: RequestInit = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(`${BASE_URL}${path}`, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 describe('Crest Logistics Backend Tests', () => {
   
   // ============================================
@@ -11,8 +24,8 @@ describe('Crest Logistics Backend Tests', () => {
   describe('Geocoding Service', () => {
     test('should geocode Toronto, Canada correctly', async () => {
       const address = 'Toronto, Canada';
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/geocode`,
+      const response = await apiFetch(
+        '/api/geocode',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -30,8 +43,8 @@ describe('Crest Logistics Backend Tests', () => {
 
     test('should geocode Berlin, Germany correctly', async () => {
       const address = 'Berlin, Germany';
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/geocode`,
+      const response = await apiFetch(
+        '/api/geocode',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -49,8 +62,8 @@ describe('Crest Logistics Backend Tests', () => {
 
     test('should geocode Tokyo, Japan correctly', async () => {
       const address = 'Tokyo, Japan';
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/geocode`,
+      const response = await apiFetch(
+        '/api/geocode',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -68,8 +81,8 @@ describe('Crest Logistics Backend Tests', () => {
 
     test('should geocode New York, USA correctly', async () => {
       const address = 'New York, USA';
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/geocode`,
+      const response = await apiFetch(
+        '/api/geocode',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -87,8 +100,8 @@ describe('Crest Logistics Backend Tests', () => {
 
     test('should handle invalid addresses gracefully', async () => {
       const address = 'ThisIsNotARealPlaceXYZ';
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/geocode`,
+      const response = await apiFetch(
+        '/api/geocode',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -100,8 +113,8 @@ describe('Crest Logistics Backend Tests', () => {
     });
 
     test('should require address parameter', async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/geocode`,
+      const response = await apiFetch(
+        '/api/geocode',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -144,8 +157,8 @@ describe('Crest Logistics Backend Tests', () => {
     };
 
     test('should register shipment with geocoded coordinates', async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const response = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -169,7 +182,7 @@ describe('Crest Logistics Backend Tests', () => {
       expect(data.shipment).toBeDefined();
       expect(data.shipment.originCoords).toBeDefined();
       expect(data.shipment.destCoords).toBeDefined();
-      console.log('✅ Shipment created with coordinates:', data.shipment.originCoords, data.shipment.destCoords);
+      console.log(' Shipment created with coordinates:', data.shipment.originCoords, data.shipment.destCoords);
     });
   });
 
@@ -201,8 +214,8 @@ describe('Crest Logistics Backend Tests', () => {
         ]
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const response = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -214,8 +227,8 @@ describe('Crest Logistics Backend Tests', () => {
     });
 
     test('should retrieve shipment with coordinates', async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${testOrderId}`
+      const response = await apiFetch(
+        `/api/shipments/${testOrderId}`
       );
       
       const data = await response.json();
@@ -224,12 +237,12 @@ describe('Crest Logistics Backend Tests', () => {
       expect(data.orderId).toBe(testOrderId);
       expect(data.originCoords).toBeDefined();
       expect(data.destCoords).toBeDefined();
-      console.log('✅ Retrieved coordinates:', data.originCoords, data.destCoords);
+      console.log(' Retrieved coordinates:', data.originCoords, data.destCoords);
     });
 
     test('should return 404 for non-existent shipment', async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/NONEXISTENT123`
+      const response = await apiFetch(
+        '/api/shipments/NONEXISTENT123'
       );
       
       expect(response.status).toBe(404);
@@ -238,8 +251,8 @@ describe('Crest Logistics Backend Tests', () => {
     afterAll(async () => {
       // Clean up
       if (testOrderId) {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${testOrderId}`,
+        await apiFetch(
+          `/api/shipments/${testOrderId}`,
           { method: 'DELETE' }
         );
       }
@@ -273,8 +286,8 @@ describe('Crest Logistics Backend Tests', () => {
         ]
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const response = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -312,8 +325,8 @@ describe('Crest Logistics Backend Tests', () => {
         ]
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const response = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -326,13 +339,13 @@ describe('Crest Logistics Backend Tests', () => {
       expect(response.status).toBe(200);
       expect(data.shipment.customerName).toBe('Updated Customer');
       expect(data.shipment.status).toBe('IN_OVERLAND_TRANSIT');
-      console.log('✅ Shipment updated successfully');
+      console.log(' Shipment updated successfully');
     });
 
     afterAll(async () => {
       if (testOrderId) {
-        await fetch(
-          `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${testOrderId}`,
+        await apiFetch(
+          `/api/shipments/${testOrderId}`,
           { method: 'DELETE' }
         );
       }
@@ -359,8 +372,8 @@ describe('Crest Logistics Backend Tests', () => {
         history: []
       };
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const response = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -372,8 +385,8 @@ describe('Crest Logistics Backend Tests', () => {
     });
 
     test('should delete shipment successfully', async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${testOrderId}`,
+      const response = await apiFetch(
+        `/api/shipments/${testOrderId}`,
         { method: 'DELETE' }
       );
       
@@ -381,12 +394,12 @@ describe('Crest Logistics Backend Tests', () => {
       
       expect(response.status).toBe(200);
       expect(data.success).toBe(true);
-      console.log('✅ Shipment deleted successfully');
+      console.log(' Shipment deleted successfully');
     });
 
     test('should return 404 when deleting non-existent shipment', async () => {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/NONEXISTENT123`,
+      const response = await apiFetch(
+        '/api/shipments/NONEXISTENT123',
         { method: 'DELETE' }
       );
       
@@ -419,8 +432,8 @@ describe('Crest Logistics Backend Tests', () => {
       };
 
       // Register
-      const registerRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const registerRes = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -431,11 +444,11 @@ describe('Crest Logistics Backend Tests', () => {
       
       expect(registerRes.status).toBe(200);
       expect(registerData.shipment.originCoords).toBeDefined();
-      console.log('✅ Shipment registered with coordinates');
+      console.log(' Shipment registered with coordinates');
 
       // 2. Retrieve
-      const retrieveRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${shipmentData.orderId}`
+      const retrieveRes = await apiFetch(
+        `/api/shipments/${shipmentData.orderId}`
       );
       const retrieveData = await retrieveRes.json();
       
@@ -443,14 +456,14 @@ describe('Crest Logistics Backend Tests', () => {
       expect(retrieveData.orderId).toBe(shipmentData.orderId);
       expect(retrieveData.originCoords).toBeDefined();
       expect(retrieveData.destCoords).toBeDefined();
-      console.log('✅ Shipment retrieved with coordinates');
+      console.log(' Shipment retrieved with coordinates');
 
       // 3. Verify coordinates are correct (Tokyo and New York)
       expect(retrieveData.originCoords.lat).toBeCloseTo(35.6762, 1);
-      expect(retrieveData.originCoords.lng).toBeCloseTo(139.7639, 1); // Fixed
+      expect(retrieveData.originCoords.lng).toBeCloseTo(139.7639, 1); 
       expect(retrieveData.destCoords.lat).toBeCloseTo(40.7128, 1);
       expect(retrieveData.destCoords.lng).toBeCloseTo(-74.0060, 1);
-      console.log('✅ Coordinates verified: Tokyo → New York');
+      console.log(' Coordinates verified: Tokyo → New York');
 
       // 4. Update status
       const updatedData = {
@@ -467,8 +480,8 @@ describe('Crest Logistics Backend Tests', () => {
         ]
       };
 
-      const updateRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/register-shipment`,
+      const updateRes = await apiFetch(
+        '/api/register-shipment',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -479,19 +492,19 @@ describe('Crest Logistics Backend Tests', () => {
       
       expect(updateRes.status).toBe(200);
       expect(updateData.shipment.status).toBe('IN_OVERLAND_TRANSIT');
-      console.log('✅ Shipment status updated');
+      console.log(' Shipment status updated');
 
       // 5. Delete
-      const deleteRes = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/shipments/${shipmentData.orderId}`,
+      const deleteRes = await apiFetch(
+        `/api/shipments/${shipmentData.orderId}`,
         { method: 'DELETE' }
       );
       const deleteData = await deleteRes.json();
       
       expect(deleteRes.status).toBe(200);
       expect(deleteData.success).toBe(true);
-      console.log('✅ Shipment deleted');
-      console.log('✅ E2E test completed successfully!');
+      console.log(' Shipment deleted');
+      console.log(' E2E test completed successfully!');
     });
   });
 
@@ -503,7 +516,7 @@ describe('Crest Logistics Backend Tests', () => {
       if (process.env.SUPABASE_URL) {
         expect(process.env.SUPABASE_URL).toBeDefined();
         expect(process.env.SUPABASE_URL).toContain('postgresql://');
-        console.log('✅ SUPABASE_URL is configured');
+        console.log(' SUPABASE_URL is configured');
       } else {
         console.log('⚠️ SUPABASE_URL not found in test environment (this is fine for CI)');
       }
@@ -512,12 +525,12 @@ describe('Crest Logistics Backend Tests', () => {
     test('NEXT_PUBLIC_GOOGLE_MAPS_PLATFORM_KEY should be configured (optional)', () => {
       if (process.env.NEXT_PUBLIC_GOOGLE_MAPS_PLATFORM_KEY) {
         expect(process.env.NEXT_PUBLIC_GOOGLE_MAPS_PLATFORM_KEY).toBeDefined();
-        console.log('✅ Google Maps API key is configured');
+        console.log(' Google Maps API key is configured');
       } else {
-        console.log('⚠️ Google Maps API key not set (optional)');
+        console.log(' Google Maps API key not set (optional)');
       }
     });
   });
 });
 
-console.log('\n🚀 Running Crest Logistics Backend Tests...\n');
+console.log('\n Running Crest Logistics Backend Tests...\n');

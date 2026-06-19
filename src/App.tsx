@@ -416,9 +416,9 @@ export default function App({
               JSON.stringify(publicFoundShipment.history)
           ) {
             setPublicFoundShipment(data);
-            console.log('📦 Shipment data received:', data);
-console.log('originCoords:', data.originCoords);
-console.log('destCoords:', data.destCoords);
+            console.log("📦 Shipment data received:", data);
+            console.log("originCoords:", data.originCoords);
+            console.log("destCoords:", data.destCoords);
           }
         }
       } catch (e) {
@@ -922,18 +922,18 @@ console.log('destCoords:', data.destCoords);
         ? `[Crest Tracking Link] Tap to view your delivery map: ${window.location.origin}/?track=${lastCreatedDomesticWaybill.orderId}`
         : domesticMessageDraft;
 
-        setSimulatedNotifications((prev) => [
-          {
-            type: dispatchChannel,
-            title: isLinkOnly
-              ? "Direct Shipment Link"
-              : "Automated Waybill Dispatch",
-            text: finalMessage,
-            sender: "Crest Admin Operations",
-            time: new Date().toLocaleTimeString(),
-          },
-          ...prev,
-        ]);
+      setSimulatedNotifications((prev) => [
+        {
+          type: dispatchChannel,
+          title: isLinkOnly
+            ? "Direct Shipment Link"
+            : "Automated Waybill Dispatch",
+          text: finalMessage,
+          sender: "Crest Admin Operations",
+          time: new Date().toLocaleTimeString(),
+        },
+        ...prev,
+      ]);
 
       setDispatchStatusMsg(
         `Success! Automated message was queued and transmitted via ${modeText} to: ${dispatchContactTarget}`
@@ -4521,17 +4521,19 @@ console.log('destCoords:', data.destCoords);
                     </div>
 
                     <TrackingMockMap
-  status={publicFoundShipment.status}
-  origin={publicFoundShipment.origin}
-  destination={publicFoundShipment.destination}
-  originCoords={publicFoundShipment.originCoords}    // ← ADD THIS
-  destCoords={publicFoundShipment.destCoords}        // ← ADD THIS
-  transitCheckpoint={publicFoundShipment.transitCheckpoint}
-  carrierName={publicFoundShipment.insights?.suggestedCarrier}
-  orderId={publicFoundShipment.orderId}
-  distanceCovered={publicFoundShipment.distanceCovered}
-  hoursDriven={publicFoundShipment.hoursDriven}
-/>
+                      status={publicFoundShipment.status}
+                      origin={publicFoundShipment.origin}
+                      destination={publicFoundShipment.destination}
+                      originCoords={publicFoundShipment.originCoords} // ← ADD THIS
+                      destCoords={publicFoundShipment.destCoords} // ← ADD THIS
+                      transitCheckpoint={publicFoundShipment.transitCheckpoint}
+                      carrierName={
+                        publicFoundShipment.insights?.suggestedCarrier
+                      }
+                      orderId={publicFoundShipment.orderId}
+                      distanceCovered={publicFoundShipment.distanceCovered}
+                      hoursDriven={publicFoundShipment.hoursDriven}
+                    />
 
                     <div className="flex flex-col gap-4">
                       <h4 className="font-black text-[#111E19] uppercase text-xs tracking-wider">

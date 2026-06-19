@@ -405,13 +405,15 @@ export default function TrackingMockMap({
     return interpolate(start, end, progressPercent / 100);
   }, [start, end, progressPercent]);
 
-  const dynamicCoords = useMemo<Record<string, { lat: number; lng: number }>>(() => {
+  const dynamicCoords = useMemo<
+    Record<string, { lat: number; lng: number }>
+  >(() => {
     return {
       MANIFEST_CREATED: start,
       DRY_BULK_SORTED: interpolate(start, end, 0.25),
-      IN_OVERLAND_TRANSIT: interpolate(start, end, 0.50),
+      IN_OVERLAND_TRANSIT: interpolate(start, end, 0.5),
       GATEWAY_CUSTOMS_HOLD: interpolate(start, end, 0.75),
-      DELIVERED: end
+      DELIVERED: end,
     };
   }, [start, end]);
 

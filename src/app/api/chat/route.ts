@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenAI } from "@google/genai";
 
-const MAX_HISTORY_LENGTH = 50;
-const MAX_MESSAGE_LENGTH = 2000;
 
+const MAX_HISTORY = 50;
+const MAX_MESSAGE_CHARS = 2000;
 
 let ai: GoogleGenAI | null = null;
 
@@ -15,21 +15,6 @@ function getGenAI(): GoogleGenAI {
     ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
   }
   return ai;
-}
-
-interface ChatHistoryEntry {
-  sender: "user" | "bot";
-  text: string;
-}
-
-function isValidHistoryEntry(entry: unknown): entry is ChatHistoryEntry {
-  if (typeof entry !== "object" || entry === null) return false;
-  const e = entry as Record<string, unknown>;
-  return (
-    (e.sender === "user" || e.sender === "bot") &&
-    typeof e.text === "string" &&
-    e.text.length > 0
-  );
 }
 
 export async function POST(req: NextRequest) {
@@ -59,37 +44,23 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (message.length > MAX_MESSAGE_LENGTH) {
-    return NextResponse.json(
-      { error: `message must be ${MAX_MESSAGE_LENGTH} characters or fewer.` },
-      { status: 400 },
-    );
-  }
 
-  if (history !== undefined && !Array.isArray(history)) {
-    return NextResponse.json(
-      { error: "history must be an array if provided." },
-      { status: 400 },
-    );
-  }
+  const historyArray = Array.isArray(history) ? history : [];
 
-  const safeHistory: ChatHistoryEntry[] = Array.isArray(history)
-    ? history.filter(isValidHistoryEntry)
-    : [];
 
-  if (safeHistory.length > MAX_HISTORY_LENGTH) {
-    return NextResponse.json(
-      { error: `history must contain ${MAX_HISTORY_LENGTH} entries or fewer.` },
-      { status: 400 },
-    );
-  }
+  const limitedHistory = historyArray.slice(-MAX_HISTORY);
 
   const contents = [
-    ...safeHistory.map((h) => ({
-      role: h.sender === "user" ? "user" : "model",
-      parts: [{ text: h.text }],
-    })),
-    { role: "user", parts: [{ text: message }] },
+    ...limitedHistory.map((h: any) => {
+      const safeSender = h && typeof h.sender === "string" ? h.sender : "model";
+      const safeText = h && typeof h.text === "string" ? h.text : "";
+      
+      return {
+        role: safeSender === "user" ? "user" : "model",
+        parts: [{ text: safeText.slice(0, MAX_MESSAGE_CHARS) }],
+      };
+    }),
+    { role: "user", parts: [{ text: message.slice(0, MAX_MESSAGE_CHARS) }] },
   ];
 
   let genAI: GoogleGenAI;

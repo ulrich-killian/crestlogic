@@ -4877,7 +4877,7 @@ export default function App({
                     target="_blank"
                     className="flex-1 bg-[#25D366] text-white py-2 rounded-lg font-bold text-center text-[10px] uppercase"
                   >
-                    💬 WhatsApp
+                     WhatsApp
                   </a>
 
                   <a

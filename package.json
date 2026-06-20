@@ -3,6 +3,9 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "overrides": {
+    "esbuild": "npm:esbuild-wasm@^0.21.5"
+  },
   "scripts": {
     "dev": "next dev --webpack -p 3000",
     "build": "next build",
@@ -38,6 +41,7 @@
     "@types/jest": "^30.0.0",
     "@types/node": "^22.14.0",
     "@types/react": "19.2.15",
+    "@types/react-dom": "^19.2.3",
     "autoprefixer": "^10.4.21",
     "jest": "^30.4.2",
     "tailwindcss": "^4.1.14",

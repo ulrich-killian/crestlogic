@@ -37,7 +37,7 @@ export default function ShipmentForm({
   const [dragActive, setDragActive] = useState(false);
   const [parsingLogs, setParsingLogs] = useState<string | null>(null);
 
-  // Core handler for text fields
+
   const handleFieldChange = (key: keyof ShipmentFormData, value: any) => {
     onChange({
       ...formData,
@@ -45,7 +45,6 @@ export default function ShipmentForm({
     });
   };
 
-  // Add item to manifest cargo list
   const handleAddItem = () => {
     const newItem: ManifestItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -58,7 +57,7 @@ export default function ShipmentForm({
     });
   };
 
-  // Handle updates to specific manifest row
+
   const handleItemChange = (itemId: string, name: string, qty: number) => {
     const updatedItems = formData.items.map(item => {
       if (item.id === itemId) {
@@ -72,16 +71,16 @@ export default function ShipmentForm({
     });
   };
 
-  // Delete matching manifest row
+
   const handleDeleteItem = (itemId: string) => {
-    if (formData.items.length <= 1) return; // Maintain at least 1 item
+    if (formData.items.length <= 1) return; 
     onChange({
       ...formData,
       items: formData.items.filter(item => item.id !== itemId)
     });
   };
 
-  // Simulated drop-zone behavior & drag triggers
+
   const handleDrag = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -103,11 +102,11 @@ export default function ShipmentForm({
     }
   };
 
-  // Auto parsing routine triggered by drops or clicking on predefined blueprints
+
   const simulateFileParsing = (fileName: string) => {
     setParsingLogs(`Reading ${fileName} secure segments...`);
     
-    // Check if filename matches any pre-configured template
+
     const templateName = Object.keys(SAMPLE_INVOICES).find(
       key => fileName.toLowerCase().includes(key.toLowerCase()) || key.toLowerCase().includes(fileName.toLowerCase())
     );
@@ -119,11 +118,11 @@ export default function ShipmentForm({
           const parsed = SAMPLE_INVOICES[templateName];
           onAutoParse({
             ...parsed,
-            orderId: generateTrackingId() // Refresh Tracking ID to make it clean
+            orderId: generateTrackingId() 
           });
           setParsingLogs(`Successfully parsed invoice! Pulled ${parsed.items.length} items to cargo table.`);
         } else {
-          // If a custom random file was uploaded, build smart randomized manifest
+      
           const randomParsed = {
             orderId: generateTrackingId(),
             customerName: "Global Ingress Partner",
@@ -142,12 +141,12 @@ export default function ShipmentForm({
           setParsingLogs("Standard structural invoice parsed. Custom items auto-loaded.");
         }
 
-        // Dissolve log bubble safely
+      
         setTimeout(() => setParsingLogs(null), 4000);
       }, 1000);
-    }, 60000000); // Handled by standard synchronous timeouts instead
+    }, 60000000); 
     
-    // Let's use clean nested setTimeout for standard visual feel
+ 
     setTimeout(() => {
       setParsingLogs("Structuring logistics manifest cells...");
       setTimeout(() => {
@@ -183,7 +182,7 @@ export default function ShipmentForm({
 
   return (
     <div className="bg-white rounded-2xl border border-stone-200/80 p-5 md:p-6 shadow-sm flex flex-col gap-6">
-      {/* Container Header */}
+    
       <div className="flex justify-between items-center pb-4 border-b border-stone-100">
         <div>
           <h2 className="font-sans font-bold text-[#111E19] text-lg uppercase tracking-wider flex items-center gap-2">
@@ -200,13 +199,12 @@ export default function ShipmentForm({
         </span>
       </div>
 
-      {/* Inputs Form */}
+
       <div className="flex flex-col gap-5">
         
-        {/* Row 1: Order Basics */}
+    
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          
-          {/* Read-Only Tracking ID Generator */}
+
           <div>
             <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <Lock className="w-3.5 h-3.5 text-stone-400" />
@@ -225,7 +223,7 @@ export default function ShipmentForm({
             </div>
           </div>
 
-          {/* Customer Name */}
+     
           <div>
             <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-1.5">
               Consignee / Customer Name
@@ -240,7 +238,7 @@ export default function ShipmentForm({
             />
           </div>
 
-          {/* Origin Address */}
+     
           <div>
             <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-1.5 font-extrabold flex items-center gap-1">
               Origin Warehouse / Hub
@@ -254,7 +252,7 @@ export default function ShipmentForm({
             />
           </div>
 
-          {/* Destination Address */}
+     
           <div>
             <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-1.5 font-extrabold flex items-center gap-1">
               Destination Terminal Address
@@ -271,7 +269,6 @@ export default function ShipmentForm({
 
         </div>
 
-        {/* Cargo Item Manifest Builder */}
         <div className="mt-2 bg-stone-50/50 rounded-2xl border border-stone-200/50 p-4">
           <div className="flex justify-between items-center mb-3">
             <h3 className="text-xs font-sans font-extrabold text-[#111E19] uppercase tracking-wider flex items-center gap-1.5">
@@ -283,7 +280,7 @@ export default function ShipmentForm({
             </span>
           </div>
 
-          {/* Manifest Row Items */}
+
           <div className="flex flex-col gap-2.5 max-h-60 overflow-y-auto pr-1">
             <AnimatePresence initial={false}>
               {formData.items.map((item, index) => (
@@ -294,12 +291,12 @@ export default function ShipmentForm({
                   exit={{ opacity: 0, scale: 0.95 }}
                   className="flex items-center gap-3 bg-white p-2.5 rounded-xl border border-stone-200/60 shadow-xs"
                 >
-                  {/* Bullet Sequence */}
+           
                   <span className="w-6 h-6 rounded-full bg-[#FAF5E9] text-[#111E19] text-xs font-mono font-bold flex items-center justify-center shrink-0">
                     {index + 1}
                   </span>
 
-                  {/* Item Description */}
+     
                   <input
                     type="text"
                     required
@@ -309,7 +306,7 @@ export default function ShipmentForm({
                     className="flex-grow border-0 focus:border-0 rounded-lg text-sm px-2.5 py-1.5 focus:outline-none text-[#111E19] placeholder-stone-400 font-medium"
                   />
 
-                  {/* Quantity Counter Box */}
+            
                   <div className="flex items-center border border-stone-200 rounded-lg overflow-hidden h-9 bg-stone-50">
                     <button
                       type="button"
@@ -331,7 +328,7 @@ export default function ShipmentForm({
                     </button>
                   </div>
 
-                  {/* Remove Button */}
+       
                   <button
                     type="button"
                     onClick={() => handleDeleteItem(item.id)}
@@ -346,7 +343,6 @@ export default function ShipmentForm({
             </AnimatePresence>
           </div>
 
-          {/* Add Manifest Row CTA */}
           <button
             type="button"
             onClick={handleAddItem}
@@ -358,10 +354,9 @@ export default function ShipmentForm({
 
         </div>
 
-        {/* Packing Metrics Grid */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-end bg-stone-50/20 p-4 border border-stone-100 rounded-2xl">
           
-          {/* Weight */}
+
           <div>
             <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <Dumbbell className="w-3.5 h-3.5 text-stone-400" />
@@ -382,7 +377,7 @@ export default function ShipmentForm({
             </div>
           </div>
 
-          {/* Dimensions */}
+
           <div>
             <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-1.5 flex items-center gap-1">
               <Maximize2 className="w-3.5 h-3.5 text-stone-400" />
@@ -397,7 +392,7 @@ export default function ShipmentForm({
             />
           </div>
 
-          {/* Fragile Switch */}
+
           <div className="flex flex-col">
             <span className="text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider mb-3">
               Special Handling Rating
@@ -424,7 +419,7 @@ export default function ShipmentForm({
 
         </div>
 
-        {/* OCR File Parsing Drop-Zone */}
+
         <div className="flex flex-col gap-2.5">
           <label className="block text-xs font-sans font-bold text-[#111E19] uppercase tracking-wider">
             Consignment Invoices & OCR Capture
@@ -462,7 +457,7 @@ export default function ShipmentForm({
             </label>
           </div>
 
-          {/* Interactive OCR Simulator Panel (Pre-loaded files you can click to parse) */}
+
           <div className="bg-[#FAF5E9]/40 border border-[#FAF5E9] rounded-xl p-3.5">
             <p className="text-[10px] font-sans font-extrabold text-[#111E19] uppercase tracking-wider mb-2 flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
@@ -496,7 +491,7 @@ export default function ShipmentForm({
             </div>
           </div>
 
-          {/* Real-Time OCR Processing Animation Logs */}
+
           <AnimatePresence>
             {parsingLogs && (
               <motion.div
@@ -514,7 +509,7 @@ export default function ShipmentForm({
             )}
           </AnimatePresence>
 
-          {/* Render uploaded document list */}
+
           {formData.uploadedFiles.length > 0 && (
             <div className="flex flex-col gap-1.5 mt-1">
               <span className="text-[10px] font-mono text-stone-400 uppercase tracking-widest font-bold">

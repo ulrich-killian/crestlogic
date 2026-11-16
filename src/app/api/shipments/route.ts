@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
-import { COURIER_SHIPMENTS } from "../../../db";
+import { getAllShipments, seedIfEmpty } from "../../../db";
 
 export async function GET() {
-  return NextResponse.json(Object.values(COURIER_SHIPMENTS));
+  try {
+    await seedIfEmpty();
+    const shipments = await getAllShipments();
+    return NextResponse.json(shipments);
+  } catch (err: any) {
+    console.error("GET /api/shipments error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
+  }
 }

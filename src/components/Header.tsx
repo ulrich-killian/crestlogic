@@ -42,7 +42,7 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
     <header className="w-full bg-white border-b border-stone-200/60 shadow-sm sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
         
-        {/* Crest Logistics Brand Logo with Cargo Ship Concept */}
+   
         <div 
           onClick={() => handleNavClick("home")}
           className="flex items-center gap-3 cursor-pointer group"
@@ -65,7 +65,7 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
           </div>
         </div>
 
-        {/* Desktop Navigation Links */}
+  
         <nav className="hidden lg:flex items-center gap-1">
           {navItems.map((item) => {
             const isActive = activeSection === item.id;
@@ -85,7 +85,7 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
           })}
         </nav>
 
-        {/* Dynamic Nodes Info badge & Callout */}
+      
         <div className="hidden md:flex items-center gap-3 text-xs font-sans">
           <div className="flex items-center gap-1.5 px-3 py-1.5 bg-stone-50 border border-stone-200/65 rounded-full text-stone-600 font-mono text-[11px]">
             <Clock className="w-3.5 h-3.5 text-[#A35638]" />
@@ -100,7 +100,7 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
           </button>
         </div>
 
-        {/* Mobile Hamburger Button */}
+  
         <button
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           className="lg:hidden p-2 text-stone-600 hover:text-[#111E19]"
@@ -109,7 +109,7 @@ export default function Header({ activeSection, onNavigate }: HeaderProps) {
         </button>
       </div>
 
-      {/* Mobile Dynamic Drawer Menu */}
+   
       {mobileMenuOpen && (
         <div className="lg:hidden border-t border-stone-100 bg-white p-4 flex flex-col gap-2.5 animate-fadeIn">
           {navItems.map((item) => {

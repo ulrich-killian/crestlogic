@@ -12,7 +12,7 @@ export default function AdminDashboardPage() {
   const router = useRouter();
 
   const handleLogout = () => {
-    // Post-session, redirect back to login
+   
     router.push("/admin/login");
   };
 

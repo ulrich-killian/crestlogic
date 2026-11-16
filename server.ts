@@ -149,7 +149,7 @@ Status: Registered and Verified.`;
 }
 
 // In-memory Shipment database for Crest Logistics
-import { COURIER_SHIPMENTS } from "./src/db";
+import { getAllShipments, getShipmentById, upsertShipment, deleteShipment, seedIfEmpty } from "./src/db";
 
 // REST Route for AI Logistics insights
 app.post("/api/logistics-ai", async (req, res) => {
@@ -243,39 +243,48 @@ Output customized warehouse containment guides, courier route schedules, and dis
   }, waitMs);
 });
 
-// GET endpoint to query a package by tracking ID
-app.get("/api/shipments/:id", (req, res) => {
+app.get("/api/shipments/:id", async (req, res) => {
   const { id } = req.params;
-  const upperId = (id || "").trim().toUpperCase();
-  const shipment = COURIER_SHIPMENTS[upperId];
-
-  if (!shipment) {
-    return res.status(404).json({ error: `Verification ID ${upperId} not found in Crest database archives.` });
+  try {
+    const shipment = await getShipmentById(id);
+    if (!shipment) {
+      return res.status(404).json({ error: `Verification ID ${id.toUpperCase()} not found in Crest database archives.` });
+    }
+    res.json(shipment);
+  } catch (err) {
+    console.error("Failed to fetch shipment:", err);
+    res.status(500).json({ error: "Database error while fetching shipment" });
   }
-
-  res.json(shipment);
 });
 
-// GET endpoint to query ALL packages
-app.get("/api/shipments", (req, res) => {
-  res.json(Object.values(COURIER_SHIPMENTS));
+// NEW
+app.get("/api/shipments", async (req, res) => {
+  try {
+    const shipments = await getAllShipments();
+    res.json(shipments);
+  } catch (err) {
+    console.error("Failed to fetch shipments:", err);
+    res.status(500).json({ error: "Database error while fetching shipments" });
+  }
 });
 
-// DELETE endpoint to delete a package
-app.delete("/api/shipments/:id", (req, res) => {
+// NEW
+app.delete("/api/shipments/:id", async (req, res) => {
   const { id } = req.params;
-  const upperId = (id || "").trim().toUpperCase();
-  
-  if (COURIER_SHIPMENTS[upperId]) {
-    delete COURIER_SHIPMENTS[upperId];
-    return res.json({ success: true, message: `Shipment ${upperId} deleted successfully.` });
+  try {
+    const deleted = await deleteShipment(id);
+    if (!deleted) {
+      return res.status(404).json({ error: `Shipment ${id.toUpperCase()} not found.` });
+    }
+    res.json({ success: true, message: `Shipment ${id.toUpperCase()} deleted successfully.` });
+  } catch (err) {
+    console.error("Failed to delete shipment:", err);
+    res.status(500).json({ error: "Database error while deleting shipment" });
   }
-  
-  return res.status(404).json({ error: `Shipment ${upperId} not found.` });
 });
 
-// POST endpoint to register a shipment
-app.post("/api/register-shipment", (req, res) => {
+
+app.post("/api/register-shipment", async (req, res) => {
   const { formData, insights } = req.body;
 
   if (!formData || !formData.orderId || !formData.customerName) {
@@ -283,44 +292,51 @@ app.post("/api/register-shipment", (req, res) => {
   }
 
   const id = formData.orderId.trim().toUpperCase();
-  const existing = COURIER_SHIPMENTS[id];
-  
-  // Set up progress history
-  const history = formData.history || (existing ? existing.history : [
-    {
-      status: "MANIFEST_CREATED",
-      location: "Crest Logistics Main Hub",
-      description: "Cargo manifest established and verified by authorized administrator.",
-      date: new Date().toISOString().replace("T", " ").replace(/\..+/, "") + " UTC"
-    }
-  ]);
 
-  const status = formData.status || (existing ? existing.status : "MANIFEST_CREATED");
+  try {
+    const existing = await getShipmentById(id);
 
-  // Store inside in-memory DB
-  COURIER_SHIPMENTS[id] = {
-    ...formData,
-    orderId: id,
-    status,
-    history,
-    insights: insights || (existing ? existing.insights : {
-      suggestedCarrier: "DHL Supply Chain Networks",
-      predictedTransitDays: "3 Days",
-      riskAssessment: "LOW",
-      directives: [
-        "Ensure standard heavy-duty wrapping of industrial cargo pallet boards.",
-        "Store in default well-ventilated ambient climate warehouses."
-      ],
-      buyerDispatchScript: `[Crest Logistics] Manifest Dispatch Saved\nAttention: ${formData.customerName}\nWaybill ID: ${id}\nReady for courier transit.`
-    })
-  };
+    const history = formData.history || (existing ? existing.history : [
+      {
+        status: "MANIFEST_CREATED",
+        location: "Crest Logistics Main Hub",
+        description: "Cargo manifest established and verified by authorized administrator.",
+        date: new Date().toISOString().replace("T", " ").replace(/\..+/, "") + " UTC"
+      }
+    ]);
 
-  console.log(`Crest Logistics: Shipment ${id} processed and saved successfully.`);
-  res.json({ success: true, shipment: COURIER_SHIPMENTS[id] });
+    const status = formData.status || (existing ? existing.status : "MANIFEST_CREATED");
+
+    const shipmentToSave = {
+      ...formData,
+      orderId: id,
+      status,
+      history,
+      insights: insights || (existing ? existing.insights : {
+        suggestedCarrier: "DHL Supply Chain Networks",
+        predictedTransitDays: "3 Days",
+        riskAssessment: "LOW",
+        directives: [
+          "Ensure standard heavy-duty wrapping of industrial cargo pallet boards.",
+          "Store in default well-ventilated ambient climate warehouses."
+        ],
+        buyerDispatchScript: `[Crest Logistics] Manifest Dispatch Saved\nAttention: ${formData.customerName}\nWaybill ID: ${id}\nReady for courier transit.`
+      })
+    };
+
+    const saved = await upsertShipment(shipmentToSave);
+
+    console.log(`Crest Logistics: Shipment ${id} processed and saved successfully.`);
+    res.json({ success: true, shipment: saved });
+  } catch (err) {
+    console.error("Failed to register shipment:", err);
+    res.status(500).json({ error: "Database error while saving shipment" });
+  }
 });
 
 async function startServer() {
-  // Vite integration middleware for asset pipelines
+  await seedIfEmpty(); 
+
   if (process.env.NODE_ENV !== "production") {
     const vite = await createViteServer({
       server: { middlewareMode: true },
@@ -339,5 +355,4 @@ async function startServer() {
     console.log(`Crest Logistics Server active on port ${PORT}`);
   });
 }
-
 startServer();

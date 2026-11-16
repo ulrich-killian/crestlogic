@@ -5,17 +5,13 @@
 
 import { ManifestItem, ShipmentFormData } from "./types";
 
-/**
- * Generates a randomized tracking ID matching the required Crest Logistics standard format
- */
+
 export function generateTrackingId(): string {
   const segment = Math.floor(100000 + Math.random() * 900000);
   return `CR-${segment}-LT`;
 }
 
-/**
- * Beautiful default initial shipment values
- */
+
 export const INITIAL_SHIPMENT_DATA: ShipmentFormData = {
   orderId: generateTrackingId(),
   customerName: "Amara Diallo",
@@ -32,9 +28,7 @@ export const INITIAL_SHIPMENT_DATA: ShipmentFormData = {
   uploadedFiles: ["wholesale_solar_invoice_049.pdf"]
 };
 
-/**
- * Template files simulating parsed data
- */
+
 export interface InvoiceTemplate {
   fileName: string;
   customerName: string;
@@ -91,9 +85,7 @@ export const SAMPLE_INVOICES: Record<string, InvoiceTemplate> = {
   }
 };
 
-/**
- * Geolocation Dictionary for high-fidelity coordinate lookups
- */
+
 export const GEO_DICTIONARY: Record<string, { lat: number; lng: number }> = {
   "california": { lat: 36.7783, lng: -119.4179 },
   "los angeles": { lat: 34.0522, lng: -118.2437 },
@@ -162,12 +154,12 @@ export function getLatLng(address: string, defaultVal: { lat: number; lng: numbe
   if (!address) return defaultVal;
   const normalized = address.toLowerCase();
   
-  // Sort keys from longest to shortest to prevent partial matches
+ 
   const sortedKeys = Object.keys(GEO_DICTIONARY).sort((a, b) => b.length - a.length);
 
   for (const key of sortedKeys) {
     const coords = GEO_DICTIONARY[key];
-    // Escape string for regex use
+
     const escapedKey = key.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
     const regex = new RegExp(`\\b${escapedKey}\\b`, 'i');
     if (regex.test(normalized)) {

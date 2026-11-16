@@ -12,8 +12,7 @@ export default function AdminLoginPage() {
   const router = useRouter();
 
   const handleLoginSuccess = () => {
-    // Session token cookie is already assigned on successful authentication.
-    // Perform real routing redirect to the administration workspace!
+
     router.push("/admin/dashboard");
   };
 
